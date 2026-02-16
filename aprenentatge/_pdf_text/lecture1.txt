@@ -1,0 +1,569 @@
+Lecture 1:
+Introduction
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+
+Contents
+• Machine learning in the context of Artificial Intelligence
+• Description of the problem and basic concepts
+• Regression tasks
+• ML design cycle
+• Exploitation (maybe as part of a perception system)
+• Flavours of machine learning
+• Development framework (suggested)
+Alberto Ortiz (updated 23/09/2025)
+
+Machine learning in AI
+• Artificial Intelligence, a couple of definitions
+– AI as a discipline:
+A branch of computer science dealing with the simulation of intelligent behaviour in 
+computers
+– AI as a property of a machine:
+The capability of a machine to imitate intelligent human behaviour
+• AI technologies
+– set of rich sub-disciplines 
+and methodologies: 
+• machine learning 
+• intelligent sensor data 
+processing
+– image processing & 
+computer vision
+• expert systems
+• robotics
+• …
+Alberto Ortiz (updated 23/09/2025)
+
+Machine learning in AI
+• Machine learning, a first definition
+– a subset of artificial intelligence in the field of computer science that makes use 
+of a varied set of techniques to give computers 
+• the ability to learn from data
+– solve a problem on the basis of “previous experience” (= collected data)
+– maybe also progressively improve performance on the specific task 
+• without being explicitly 
+programmed
+Alberto Ortiz (updated 23/09/2025)
+
+Machine learning in AI
+• A formalization of Machine Learning (from Tom Mitchell, CMU 1998)
+– Machine Learning is the study of algorithms that 
+• improve their performance 𝑃
+• at some task 𝑇
+• with experience 𝐸
+– A well-defined learning task is given by < 𝑇, 𝐸, 𝑃 >
+• Some examples:
+T: Recognizing hand-written words
+E: Database of human-labeled images of handwritten 
+words 
+P: Percentage of words correctly classified
+T: Playing checkers
+E: Record of practice games
+P: Percentage of games won against an arbitrary opponent
+T: Driving on four-lane highways using vision sensors
+E: A sequence of images and steering commands recorded 
+while observing a human driver 
+P: Average distance traveled before a human-judged error
+T: Categorize email messages as spam or legitimate
+E: Database of emails, with human-given labels
+P: Percentage of email messages correctly classified
+Alberto Ortiz (updated 23/09/2025)
+
+Machine learning in AI
+• Machine learning, a brief chronology
+Alberto Ortiz (updated 23/09/2025)
+
+Machine learning in AI
+• Nowadays, we are experiencing the AI boom. Why now? 
+– We are now capable of addressing and solving hard problems
+Alberto Ortiz (updated 23/09/2025)
+
+
+Machine learning in AI
+• Nowadays, we are experiencing the AI boom. Why now? 
+– We are now capable of addressing and solving hard problems
+Alberto Ortiz (updated 23/09/2025)
+
+
+Machine learning in AI
+• Nowadays, we are experiencing the AI boom. Why now?
+– Availability of computational power
+• Hardware (GPU, TPU) at reasonable cost
+• Cloud computing
+• Case of perception systems: availability of low-cost sensors, e.g. vision cameras
+– Availability of data
+• Datasets publicly available in general 
+• Tons of data produced and available, “big data” (90% produced during the last years)
+– Democratization of tools
+• Open source tools and frameworks
+• Wide adoption in the research community 
+and also companies
+– Economical value from AI
+• More funding
+• More research
+• More applications
+Alberto Ortiz (updated 23/09/2025)
+
+Contents
+• Machine learning in the context of Artificial Intelligence
+• Description of the problem and basic concepts
+• Regression tasks
+• ML design cycle
+• Exploitation (maybe as part of a perception system)
+• Flavours of machine learning
+• Development framework (suggested)
+Alberto Ortiz (updated 23/09/2025)
+
+• A simple example:
+classify fish arriving on a conveyor belt 
+based on the information provided by a 
+vision camera
+– Discriminate between salmon and 
+sea bass
+– The image is pre-processed as 
+much as needed, e.g. isolate the fish 
+instances that appear in the image 
+(segmentation)
+– A feature extractor is able to 
+measure key properties of every 
+piece
+– A classifier runs on the selected 
+features
+(data flow can be bi-directional, stages can 
+cooperate among them)
+Description of the problem
+pre-procesing
+Alberto Ortiz (updated 23/09/2025)
+
+• A simple example (cont.):
+– We can consider several properties of every piece:
+• length
+• brightness (i.e. gray-level)
+• width
+• number and shape of the fins 
+• position of the mouth, etc.
+– One has to take into account the variability in the chosen property, together with: 
+• Variations in the gray-level at every pixel:
+– Non-uniform reflectance
+– Non-uniform illumination
+– Shadows, specularities (glossiness)
+• Position of the piece over the belt, 
+• Camera noise,
+• Noise from the pre-processing stage
+ One cannot expect the same value in all measurements
+control the image capture conditions
+Description of the problem
+Alberto Ortiz (updated 23/09/2025)
+
+• A simple example(cont.):
+– We have been informed that salmons tend to be shorter than sea bass pieces
+– We take a number of samples (= images) for training (200-300) and build a 
+histogram:
+– As can be seen, the piece length by itself is a rather poor criterion to 
+discriminate in a trustworthy way between the two species
+Plus32
+Description of the problem
+Alberto Ortiz (updated 23/09/2025)
+
+• A simple example (cont.):
+– We consider another feature: the average gray level of the scales
+– The resulting histograms and the critical value 𝒙∗ are much more satisfactory 
+since classes are better separated
+Plus32
+Description of the problem
+Alberto Ortiz (updated 23/09/2025)
+
+• A simple example (cont.):
+– Feature selection and evaluation of the system
+• associate a cost to each misclassification and optimize the cost among the different 
+possible features 
+– Look for 𝒙∗ that minimizes the total cost to set an optimal decision rule
+• so far we have assumed that the cost of a misclassification is symmetrical: it is just 
+as wrong to confuse sea bass with salmon as it is to do the opposite
+– However, customers are not likely to think the same …
+ define the types of error and associate a different cost to each
+– Let us assume we have tested all the features separately. Now, it is turn to try 
+with several features simultaneously …
+Description of the problem
+Alberto Ortiz (updated 23/09/2025)
+
+• A simple example (cont.):
+– We observe that the sea bass tends to be wider than salmons …
+– … and so we have a vector of features, so-called a descriptor:
+the feature extractor has reduced the image of every piece to a point in a plane !!
+– The problem has now
+become into partitioning
+the feature space into two
+regions and find a 
+decision curve (2D)
+Plus32
+Description of the problem
+Alberto Ortiz (updated 23/09/2025)
+
+• A simple example (cont.):
+– the best decision curve is that one that classifies in an optimal way the 
+samples of the training set ?
+– would this model classify samples out from the training set with the same level 
+of performance?
+this decision curve is overfitted to the training set !! (overfitting)
+Plus32
+Description of the problem
+Alberto Ortiz (updated 23/09/2025)
+
+• A simple example (cont.):
+– The following decision curve could be a good compromise between performance 
+on the training set, simplicity of the classifier and behaviour with new samples
+Plus32
+Description of the problem
+Alberto Ortiz (updated 23/09/2025)
+
+• A simple example (cont.):
+– The key point is that the classifier is capable of dealing well with as many 
+unseen samples as possible → problem of generalization
+• It is not a matter of huge amounts of data, but of a training set well representing 
+the classification problem
+– Notice that the classifier would be perfect only if all possible cases were 
+available
+• It is better a classifier not so good with the training set but that generalizes well and 
+is capable of classifying correctly samples not used for training 
+• On the other side:
+– William of Occam, 1280-1347? 
+Entia non sunt multiplicanda praeter necessitatem
+(entities should not be multiplied unless needed)
+ under equal conditions, the simplest model is the likeliest to be 
+correct
+(Occam’s razor)
+Description of the problem
+Alberto Ortiz (updated 23/09/2025)
+
+• Description of the problem (cont.):
+– We could add other features: e.g. the eye color
+• Features should be informative in order to separate better the classes
+(= uncorrelated with the ones that we already have)
+• New features should not reduce the effectivity of the classifier  remove noisy 
+features
+• The computational cost associated to calculating each new feature has to be taken 
+into account
+Working in n dimensions is not for free, adding a new dimension improves the 
+effectivity in a significative way?
+Real-time operation is necessary? Is it possible at the computational level?
+e.g. recognize zip codes: conveyor belt for letters distribution moves at a 
+speed of v cm/s to classify t letters per hour
+Description of the problem
+→ decision rule
+(surface, hypersurface)
+nD
+Alberto Ortiz (updated 23/09/2025)
+
+Basic concepts
+• So far, some basic concepts from machine learning have emerged:
+– Samples are represented by means of descriptors
+• Designed to capture the relevant information for the specific classification problem, 
+aiming at removing any unnecessary complexity:
+– Ideally, the representation should disclose in a simple and natural way the 
+structure of the classes in feature space
+– A good representation is a key aspect of any ML problem
+• Usually, descriptors are n-dimensional vectors:
+– Vectors of real numbers:
+– Categorical data: 
+Alberto Ortiz (updated 23/09/2025)
+
+Basic concepts
+• Hence the ML task becomes into working out a function 𝑓 as follows:
+− If we know 𝑓, we also have the separation curve between classes, which in turn defines 
+the decision rule: single value, straight line, generic curve, surface, hyper-surface
+Alberto Ortiz (updated 23/09/2025)
+
+Basic concepts
+• Solving the fish example:
+import numpy as np
+from sklearn import svm
+import matplotlib.pyplot as plt
+data = np.loadtxt('fish.txt')
+X = data[:,1:-1]
+y = data[:,-1]
+# indices of classes
+i0 = np.where(y == 0)[0]
+i1 = np.where(y == 1)[0]
+# class samples
+X0 = X[i0,:]
+y0 = y[i0]
+X1 = X[i1,:]
+y1 = y[i1]
+# number of samples for each class
+print('number of samples class 0: ',   
+X0.shape[0], y0.shape[0])
+print('number of samples class 1: ', 
+X1.shape[0], y1.shape[0])
+# ML model: straight line
+clf = svm.LinearSVC(fit_intercept=True, random_state=0)
+clf.fit(X, y) # training
+# get the model parameters
+w = clf.coef_[0]
+a, b = w[0], w[1] 
+c = clf.intercept_[0]
+print('a = %.3f, b = %.3f, c = %.3f' % (a, b, c))
+# plotting
+plt.figure()
+# plot samples    
+plt.scatter(X0[:,0],X0[:,1],label='class 0') 
+plt.scatter(X1[:,0],X1[:,1],label='class 1')
+# plot model
+yy = np.linspace(X[:,1].min(),X[:,1].max(),100)
+plt.plot(-b/a * yy - c/a, yy, 'k:')
+plt.legend()
+plt.show()
+# make two predictions
+p = [4, 22]
+l = clf.predict([p])[0]
+print('predicted label for p = {} is {}'.format(p, l))
+q = [6, 15]
+l = clf.predict([q])[0]
+print('predicted label for q = {} is {}'.format(q, l))
+Alberto Ortiz (updated 23/09/2025)
+
+Basic concepts
+• Solving the fish example:
+number of samples class 0:  74 74
+number of samples class 1:  57 57
+a = 0.455, b = 0.058, c = -3.328
+predicted label for p = [4, 22] is 0.0
+predicted label for q = [6, 15] is 1.0
+Alberto Ortiz (updated 23/09/2025)
+
+Basic concepts
+• Hence the ML task becomes into working out a function 𝑓 as follows:
+− If we know 𝑓, we also have the separation curve between classes, which in turn defines 
+the decision rule: single value, straight line, generic curve, surface, hyper-surface
+• Once 𝑓 has been determined, the model has to be evaluated:
+CONFUSION MATRIX real positives real negatives
+positive predictions TP FP
+negative predictions FN TN
+𝐴 =
+TP+TN
+TP+TN+FP+FN (accuracy)
+Alberto Ortiz (updated 23/09/2025)
+
+• RECAPITULATION: To solve a classification problem, it is important
+– to know how to generate features and choose the most appropriate ones
+– know as many classification techniques as posible, as well as their
+strengths and weaknesses
+• Some machine learning models:
+– Bayesian classifiers
+– Neural networks
+– Decision trees, etc.
+• Although humans are able to move quickly, smoothly and without apparent effort from 
+one classification task to another ...
+… designing a universal classifier (capable of performing accurately in a wide 
+variety of tasks) is yet an unsolved problem
+– each decision task may require different features and thus result into different 
+decision rules with different effectiveness levels
+– each technique is suitable for one type of problem
+Basic concepts
+Alberto Ortiz (updated 23/09/2025)
+
+Contents
+• Machine learning in the context of Artificial Intelligence
+• Description of the problem and basic concepts
+• Regression tasks
+• ML design cycle
+• Exploitation (maybe as part of a perception system)
+• Flavours of machine learning
+• Development framework (suggested)
+Alberto Ortiz (updated 23/09/2025)
+
+Regression tasks
+• Goal. Find some functional description of data, often for predicting values for new inputs
+– Data involved: 
+• 𝑋 = 𝑵 samples
+• 𝑦 = expected values instead of class labels
+– Learning based on the approximation error
+• Meaningful examples:
+– Weather prediction
+– Stock market price prediction
+– Economical/Market trends capture and forecasting
+– etc.
+Classification versus Regression
+Straight line fitting:
+given 𝑥𝑖, 𝑦𝑖  and
+(in general, 
+curve fitting)
+𝑦 = 𝑎𝑥 + 𝑏
+𝑎, 𝑏 ?
+𝑥1 𝑥2 𝑥3 𝑥4 𝑦 = class
+1 2 -4 3 1
+3 2 2 2 1
+2 5 3 2 2
+2 4 2 3 2
+1 1 0 2 1
+6 2 4 1 2
+Alberto Ortiz (updated 23/09/2025)
+
+Regression tasks
+• Example. M-degree polynomial curve fitting:  𝑡 = 𝑎𝑀𝑥𝑀 + 𝑎𝑀−1𝑥𝑀−1 + ⋯ + 𝑎1𝑥 +  𝑎0
+– Data involved: 
+• 𝑋 = 𝑵 samples
+• 𝑦 = expected values 
+(continuous variable)
+Alberto Ortiz (updated 23/09/2025)
+
+Contents
+• Machine learning in the context of Artificial Intelligence
+• Description of the problem and basic concepts
+• Regression tasks
+• ML design cycle
+• Exploitation (maybe as part of a perception system)
+• Flavours of machine learning
+• Development framework (suggested)
+Alberto Ortiz (updated 23/09/2025)
+
+The design cycle
+• To design an ML / perception system one typically has to:
+• can be a large part of the cost
+• preliminary study with few samples but many more later
+• how do you know if we have all the necessary samples?
+• characteristics that separate classes well, invariant to irrelevant 
+transformations, etc.
+• useful prior knowledge: typical attributes, shape of classes, ...
+• linear/no, single/ensemble, neural network / SVM / decision tree ...
+• predict classifier behaviour, performance, complexity, etc.
+• choose samples for training (training set)
+• find the parameters of the classes if needed, e.g. distribution 
+• determine the model parameters
+• choose the samples for testing (test set) 
+• detect overfitting, and other misbehaviours
+• evaluate the classif. complexity and scalability (dimensions/classes)
+collect samples
+choose
+characteristics
+choose
+the ML model
+train
+the model
+evaluate
+the model
+Alberto Ortiz (updated 23/09/2025)
+
+Contents
+• Machine learning in the context of Artificial Intelligence
+• Description of the problem and basic concepts
+• Regression tasks
+• ML design cycle
+• Exploitation (maybe as part of a perception system)
+• Flavours of machine learning
+• Development framework (suggested)
+Alberto Ortiz (updated 23/09/2025)
+
+ML and perception systems
+• Perception and ML systems typically adhere to the following structure:
+• difficulty = sensor characteristics and limitations: bandwidth, 
+resolution, sensitivity, distortion, signal-to-noise ratio,... 
+• isolate structures in the data: e.g. isolate objects in an image, 
+isolate phonemes/words in sound, …
+• calculate each feature (= properties) of the chosen descriptor
+• simple or complex calculations
+• works with abstract entities
+• typically, independent of the application domain
+• difficulty = accurate predictions despite classes variability
+• exploit context information to improve classification
+– e.g. T-E C-T in English would be completed as THE CAT
+• combine classifiers: acoustic recognition + lip reading
+data capture
+(sensors)
+pre-processing
+extraction of
+characteristics
+classification
+post-processing
+decision
+environment
+Data
+(do not 
+come 
+from a
+sensor)
+perception system
+ML system
+Alberto Ortiz (updated 23/09/2025)
+
+Contents
+• Machine learning in the context of Artificial Intelligence
+• Description of the problem and basic concepts
+• Regression tasks
+• ML design cycle
+• Exploitation (maybe as part of a perception system)
+• Flavours of machine learning
+• Development framework (suggested)
+Alberto Ortiz (updated 23/09/2025)
+
+Flavours of machine learning
+• A distinction is made between several types of learning:
+– supervised learning
+• an expert labels each sample 
+of the dataset
+– unsupervised learning
+• there is no explicit expert
+• grouping techniques (clustering)
+Alberto Ortiz (updated 23/09/2025)
+
+Flavours of machine learning
+• A distinction is made between several types of learning:
+– supervised learning
+• an expert tags each sample 
+of the dataset
+– unsupervised learning
+• there is no explicit expert, grouping techniques (clustering)
+• ideally, the system looks for the natural structure of the data 
+Alberto Ortiz (updated 23/09/2025)
+
+Flavours of machine learning
+• A distinction is made between several types of learning:
+– supervised learning
+• an expert tags each sample 
+of the dataset
+– unsupervised learning
+• there is no explicit expert, grouping techniques (clustering)
+• ideally, the system looks for the natural structure of the data 
+– reinforcement learning or learning with a critic
+• the system learns how to make decisions by exploring the problem through a set of 
+trials/interactions with the environment which lead to positive or negative rewards
+Alberto Ortiz (updated 23/09/2025)
+
+Contents
+• Machine learning in the context of Artificial Intelligence
+• Description of the problem and basic concepts
+• Regression tasks
+• ML design cycle
+• Exploitation (maybe as part of a perception system)
+• Flavours of machine learning
+• Development framework (suggested)
+Alberto Ortiz (updated 23/09/2025)
+
+(suggested) Development framework
+• Python 3.x (e.g. 3.13) 
+(www.python.org)
+• Numpy (numpy.org)
+• Scikit-learn (scikit-learn.org)
+• Pandas (pandas.pydata.org)
+• Matplotlib (matplotlib.org)
+• Other libraries as needed
+• Anaconda (www.anaconda.com)
+Alberto Ortiz (updated 23/09/2025)
+
+(suggested) Development framework
+• Spyder IDE (www.spyder-ide.org)
+• JupyterLab (from inside Anaconda)
+• Visual Studio IDE
+(code.visualstudio.com)
+Alberto Ortiz (updated 23/09/2025)
+
+Lecture 1:
+Introduction
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

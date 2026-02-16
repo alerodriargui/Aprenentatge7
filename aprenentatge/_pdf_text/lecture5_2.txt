@@ -1,0 +1,407 @@
+Section 2
+Unsupervised Learning:
+Hierarchical Clustering
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+Alberto Ortiz (last update 12/01/2026) 2
+Contents
+• Introduction
+• Agglomerative clustering
+• Divisive clustering
+• Selection of a good clustering
+
+3
+Introduction
+• Given a set of samples 𝑋, HC algorithms produce a set of clusterings, not just one
+• 𝑁 samples  𝑁-level hierarchy − 𝑁 execution steps
+• Essentially, two sorts of hierarchical clustering algorithms:
+– Agglomerative —
+– Divisive —
+– both are just heuristic, not optimal, i.e. they do not optimize any objective function
+– a hierarchy of clusterings is produced even if there is no structure in the data
+Alberto Ortiz (last update 12/01/2026)
+DENDROGRAM (binary tree)
+R0 : {x1}, {x2}, {x3}, {x4}, {x5}
+R1 : {x1, x2}, {x3}, {x4}, {x5}
+R2 : {x1, x2}, {x3}, {x4, x5}
+R3 : {x1, x2}, {x3, x4, x5}
+R4 : {x1, x2, x3, x4, x5}
+Actually, it is a hierarchy of 
+clusterings, as they can be 
+considered nested:
+R0  R1  R2  R3  R4  R5
+{x1}, {x2}, {x3}, {x4}, {x5} → {x1, x2, x3, x4, x5}   (bottom-up process)
+{x1, x2, x3, x4, x5} → {x1}, {x2}, {x3}, {x4}, {x5}   (top-down process)
+
+Alberto Ortiz (last update 12/01/2026) 4
+Contents
+• Introduction
+• Agglomerative clustering
+• Divisive clustering
+• Selection of a good clustering
+
+5
+Agglomerative clustering
+• Generic algorithm:
+OBSERVATIONS:
+– when two samples get in the same cluster, they keep together until the end
+– there is no way to recover from a bad merge
+Alberto Ortiz (last update 12/01/2026)
+
+
+6
+Agglomerative clustering
+• At the level 𝑡, there are 𝑁 − 𝑡 clusters. therefore, one has to analyze:
+clusters to find the best merge for level 𝑡 + 1.
+• The number of merges which have to be considered up to the end of the process can 
+be easily calculated:
+This gives an idea of the complexity of the process.
+Alberto Ortiz (last update 12/01/2026)
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 7
+Agglomerative clustering
+• From an implementation point of view, there are two main approaches of 
+agglomerative clustering:
+• based on matrix concepts
+• based on graph theory
+– We will consider the first approach. Some previous concepts first:
+• data matrix:
+• proximity matrix:
+(e.g. dissimilarity
+matrix)
+– point of departure
+for dendrogram
+construction
+
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 8
+• Example:
+• given X = {x1,x2,x3,x4,x5} such that
+• [1] Using the Euclidean distance, the  
+proximity matrix (dissimilarity) is
+– notice the diagonal elements are 0
+• [2] Using the Tanimoto measure, the
+proximity matrix (similarity) is
+– notice the diagonal elements are 1
+Agglomerative clustering
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 9
+• Example: dendrograms for
+similarity
+dendrogram
+dissimilarity 
+dendrogram
+[1] proximity function:  Euclidean distance (d2)
+[2] proximity function: Tanimoto similarity (sT)
+Agglomerative clustering
+the sequence 
+of mergings is 
+different because
+d2  1 – sT !!
+
+Alberto Ortiz / EPS (last update 12/01/2026) 10
+• Example: dendrogram for 
+(a) d(C3,C6)
+(b) d(C4,C6)
+(c) d(C5,C6)
+¡¡ this information
+is available from P0 !!
+C6 = {x1, x2}
+C7 = {x4, x5}
+(a) = min{d(x3,x1)5.00, d(x3,x2)4.24}
+(b) = min{d(x4,x1)6.40, d(x4,x2)5.66}
+(c) = min{d(x5,x1)7.43, d(x5,x2)6.73}
+Agglomerative clustering
+
+Alberto Ortiz / EPS (last update 12/01/2026) 11
+• Example: dendrogram for 
+Agglomerative clustering
+(a) d(C3,C7)
+(b) d(C6,C7)
+C8 = {x3, {x4, x5}}
+(a) = min{d(x3,x4)1.41, d(x3,x5)2.50}
+(b) = min{d(x1,x4)6.40, d(x1,x5)7.43, d(x2,x4)5.66, d(x2,x5)6.73}
+
+Alberto Ortiz / EPS (last update 12/01/2026) 12
+• Example: dendrogram for 
+Agglomerative clustering
+(a) d(C6,C8) C9 = {{x1, x2}, {x3, {x4, x5}}}
+(a) = min{d(x1,x3)5.00, d(x1,x4)6.40, d(x1,x5)7.43,
+                d(x2,x3)4.24, d(x2,x4)5.66, d(x2,x5)6.73}
+0.00
+
+Alberto Ortiz / EPS (last update 12/01/2026) 13
+C6 = {x1, x2} (1.00)
+C7 = {x4, x5} (1.12)
+C8 = {x3, {x4, x5}} (1.41)
+C9 = {{x1, x2}, {x3, {x4, x5}}} (4.24)
+• Example: dendrogram for 
+Agglomerative clustering
+
+Alberto Ortiz / EPS (last update 12/01/2026) 14
+• In this way, the clustering algorithm turns out to be as follows:
+Agglomerative clustering
+
+Alberto Ortiz / EPS (last update 12/01/2026) 15
+• Additional remarks:
+• the dendrogram strongly depends on the chosen proximity measure 
+between clusters(Ci,Cj)
+• the shape of the dendrogram itself indicates whether the clustering at a 
+certain level is natural or not:
+– a great “jump” between levels suggests the existence of a non-natural 
+merging
+– it is not necessary to build completely the dendrogram: one can stop at 
+a certain level, before reaching a non-natural clustering, or when a 
+certain number of clusters has been found
+• regarding the adequateness of a merge, every step of the algorithm 
+increases the total variance of the clustering Et, defined by:
+x1 x2 x3 x4 x5
+Agglomerative clustering
+(Euclidean distance
+assumed)
+
+Alberto Ortiz / EPS (last update 12/01/2026) 16
+• Increase of total variance from level t to level t+1: 
+– Let us consider the merge between clusters Ci and Cj into cluster Cq at level t+1
+– Then, the increment of total variance can be stated as:
+– Taking into account that:
+Agglomerative clustering
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 17
+• Increase of total variance from level 𝑡 to level 𝑡 + 1: 
+– Since Cq is the merge of Ci and Cj, the increment of total variance is given by:
+– Taking into account that:
+then we obtain:
+and
+Agglomerative clustering
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 18
+• Agglomerative algorithms depending on the proximity function between clusters
+– Nearest neighbour (or single-link / single-linkage)
+– favour elongated clusters (chain effect)
+• Example of application:
+x1 x2 x3 x4 x5 x6 x7
+1.0 1.1 1.2 1.3 1.4 1.5
+x8 x9
+x11
+x10
+2.0
+2.4
+2.2
+2.6
+4.5 5.0
+
+Agglomerative clustering
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 19
+• Agglomerative algorithms depending on the proximity function between clusters
+– Farthest neighbour (or complete-link / complete-linkage)
+– favour compact clusters (reduced diameter clusters)
+• Example of application:
+x1 x2 x3 x4 x5 x6 x7
+1.0 1.1 1.2 1.3 1.4 1.5
+x8 x9
+x11
+x10
+2.0
+2.4
+2.2
+2.6
+4.5 5.0
+Agglomerative clustering
+
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 20
+• Agglomerative algorithms depending on the proximity function between clusters
+– NN and FN algorithms are at the opposite ends of the spectrum of measures 
+cluster-to-cluster (Ci, Cj)
+– Other algorithms, with intermediate behaviours, result for other distances:
+Agglomerative clustering
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 21
+• Agglomerative algorithms depending on the proximity function between clusters
+– In particular:
+ leads to the minimum total variance increase between steps if (i,j) = ||i – j||:
+• The algorithm chooses the pair of clusters that minimize
+and we have already seen that                                                          .
+• Because of this, this algorithm is termed algorithm (of agglomerative hierarchical 
+clustering) of minimum variance.
+• At a practical level, this algorithm favours the fusion of small clusters with large 
+clusters against fusing large or medium-size clusters, because of the involvement of 
+cluster sizes in the proximity measure.
+Agglomerative clustering
+
+Alberto Ortiz / EPS (last update 12/01/2026) 22
+• Agglomerative algorithms depending on the proximity function between clusters
+– Example (of Ward distance use):
+Agglomerative clustering
+
+Alberto Ortiz / EPS (last update 12/01/2026) 23
+• Agglomerative algorithms depending on the proximity function between clusters
+– Example (of Ward distance use):
+– In clear cases (compact and well separated clusters), all alternatives lead to the 
+same results. Differences appear for particular cases.
+x1 x2 x3 x4 x5 x6 x7
+1.0 1.1 1.2 1.3 1.4 1.5
+x8 x9
+x11
+x10
+2.0
+2.4
+2.2
+2.6
+4.5 5.0
+Agglomerative clustering
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 24
+• Monotonicity
+– If the clustering algorithm selects clusters Ci y Cj to build a new cluster Cq so that d(Cq,Ck) 
+  d(Ci,Cj), k  i, j, q, then the resulting dendrogram is said to be monotonous
+– If monotonicity holds, clusters are created at higher dissimilarity levels than its constituents
+– min, max, avg and ward can be proved to always give rise to monotonous 
+dendrograms. 
+– Monotonicity has been considered to be necessary for a clustering algorithm to be useful.
+Agglomerative clustering
+YES YES NO
+
+Alberto Ortiz / EPS (last update 12/01/2026) 25
+Agglomerative clustering
+• Ties in the proximity matrix P(X)
+
+Alberto Ortiz / EPS (last update 12/01/2026) 26
+Agglomerative clustering
+• Ties in the proximity matrix P(X)
+• All agglomerative algorithms are more or less affected by
+this defect, although the nearest neighbour algorithm
+seems to be the least affected.
+
+Alberto Ortiz (last update 12/01/2026) 27
+Contents
+• Introduction
+• Agglomerative clustering
+• Divisive clustering
+• Selection of a good clustering
+
+Alberto Ortiz / EPS (last update 12/01/2026) 28
+Divisive Clustering
+• Generic algorithm:
+– Very high cost at the computational level 
+– Different alternatives available, which try to reduce the cost of (3.1)
+
+
+Alberto Ortiz (last update 12/01/2026) 29
+Contents
+• Introduction
+• Agglomerative clustering
+• Divisive clustering
+• Selection of a good clustering 
+
+Alberto Ortiz / EPS (last update 12/01/2026) 30
+Selection of a good clustering (in the hierarchy)
+• We turn our attention to the determination of a good clustering within a given 
+hierarchy. This can help to identify the natural structure of the data.  
+1. Find in the dendrogram clusters with a long lifetime:
+– lifetime of a cluster  absolute diference between the proximity level at which a 
+cluster is generated and the level at which it is absorbed
+ final clustering should be: {x1,x2}, {x3,x4,x5}
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 31
+Selection of best clustering
+1. Find in the dendrogram clusters with a long lifetime:
+– lifetime of a cluster  absolute difference between the proximity level at which 
+a cluster is generated and the level at which it is absorbed
+– another 
+example:
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 32
+Selection of best clustering
+2. Stop before a low-quality cluster results:
+– Determine the disimilarity within a cluster by means of an appropriate measure 
+h. Several possibilities:
+– In this way, every time a cluster is going to be created, one can check its internal 
+dissimilarity and decide not to create it if it is above a threshold , and the 
+process is stopped:
+– It is usually useful to define  =  + , where  is the average distance among 
+elements of X and  is the standard deviation. (The proximity measure is 
+assumed a dissimilarity.)
+• Typically, it is easier to set  than .
+max{d}
+
+Alberto Ortiz / EPS (last update 12/01/2026) 33
+Example
+• Example: gene expression profiling of human tissues
+– Each row is a gene expression profile and each column is a different gene. The column names are 
+the gene symbols. The outcome is a character vector representing the tissue.
+– Subset of the original dataset comprising 22.215 samples
+– 189 samples chosen at random, with L = 500
+– 7 tissues:
+– source: https://github.com/genomicsclass/tissuesGeneExpression
+cerebellum colon endometrium hippocampus kidney liver placenta
+38 34 15 31 39 26 6
+average linkage
+algorithm
+189 = 
+
+Alberto Ortiz / EPS (last update 12/01/2026) 34
+Example
+• xx
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 35
+Example
+• xx
+
+
+Alberto Ortiz / EPS (last update 12/01/2026) 36
+Example
+• “Cutting” the dendrogram
+at height = 125:
+##                     cluster
+## tissue 1  2  3  4  5  6
+## 1.cerebellum   0 36  0  0  2  0
+## 2.colon        0  0 34  0  0  0
+## 3.endometrium 15  0  0  0  0  0
+## 4.hippocampus  0 31  0  0  0  0
+## 5.kidney      37  0  0  0  2  0
+## 6.liver        0  0  0 24  2  0
+## 7.placenta     0  0  0  0  0  6
+contingency table →
+(or contingency matrix)     
+
+Alberto Ortiz / EPS (last update 12/01/2026) 37
+Example
+• “Cutting” the dendrogram
+so as to have 8 clusters:
+##                        cluster
+## tissue 1  2  3  4  5  6  7  8
+## 1.cerebellum   0 31  0  0  2  0  5  0
+## 2.colon        0  0 34  0  0  0  0  0
+## 3.endometrium  0  0  0  0  0 15  0  0
+## 4.hippocampus  0 31  0  0  0  0  0  0
+## 5.kidney      37  0  0  0  2  0  0  0
+## 6.liver        0  0  0 24  2  0  0  0
+## 7.placenta     0  0  0  0  0  0  0  6
+
+Section 2
+Unsupervised Learning:
+Hierarchical Clustering
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

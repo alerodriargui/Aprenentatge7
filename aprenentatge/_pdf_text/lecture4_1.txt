@@ -1,0 +1,75 @@
+Instance-based learning: Introduction
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+2
+Generic description
+• Instance-based learning (IBL) refers to a family of techniques for classification and  
+regression, which produce a class label/regressed value on the basis of a subset 
+of the training set
+– IBL is a class of supervised learning (SL) algorithm
+– The entire training set is needed for training, but, contrary to generic supervised 
+learning algorithms, only a subset (of examples) might be needed during use
+• IBL algorithms do not build a complete abstraction from all the data stored in the 
+training set to build a kind of global model, which can take the form of
+– an expression, e.g. the hyperplane that discriminates between two classes 1 and 2:
+Alberto Ortiz (last update 24/11/2025)
+1
+2
+w
+
+3
+Generic description
+• Instance-based learning (IBL) refers to a family of techniques for classification and  
+regression, which produce a class label/regressed value on the basis of a subset 
+of the training set
+– IBL is a class of supervised learning (SL) algorithm
+– The entire training set is needed for training, but, contrary to generic supervised 
+learning algorithms, only a subset (of examples) might be needed during use
+• IBL algorithms do not build a complete abstraction from all the data stored in the 
+training set to build a kind of global model, which can take the form of
+– an algorithm, e.g. a decision tree
+Alberto Ortiz (last update 24/11/2025)
+x3 < 2.45 x3  2.45
+x4 < 1.75 x4  1.75
+x3 < 4.95 x3  4.95
+x4 < 1.65 x4  1.65
+setosa
+virginica
+virginica
+virginicaversicolor
+IRIS dataset
+x1 – sepal length
+x2 – sepal width
+x3 – petal length
+x4 – petal width
+
+4
+Generic description
+• IBL is also known as memory-based learning, exemplar-based learning, case-
+based learning or experience-based learning
+• Since there is no abstraction, the subset of examples have to be accessible
+– stored in memory
+– stored in a database
+• To battle the memory complexity of storing all training instances, instance reduction 
+algorithms have been developed
+– This also provides a way to counteract overfitting
+• One advantage that some instance-based learners have over other methods of 
+machine learning is its ability to adapt its model to new samples
+– Some instance-based learners may simply store a new instance or throw an old instance 
+away
+• Examples of instance-based learning algorithms are 
+– The k-nearest neighbors algorithm, 
+– Support Vector Machines (SVM) and in general Kernel machines, 
+– Radial Basis Function networks (RBFN), etc.
+Alberto Ortiz (last update 24/11/2025)
+
+Instance-based learning: Introduction
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

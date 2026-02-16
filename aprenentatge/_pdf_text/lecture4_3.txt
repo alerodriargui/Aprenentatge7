@@ -1,0 +1,591 @@
+Instance-based learning:
+k-Nearest Neighbours
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+Alberto Ortiz (last update 15/12/2025) 2
+Contents
+• k-Nearest Neighbours classifier
+• Supplementary material: Nearest-Neighbour Search & k-d trees
+• Condensed Nearest Neighbours
+• Example of use
+
+Alberto Ortiz (last update 15/12/2025) 3
+k-Nearest Neighbours classifier
+• Supervised classification scheme based on the so-called k-nearest neighours rule:
+– Given an unknown sample 𝑥 and a distance 𝑑(𝑥, 𝑦), e.g. Euclidean 𝑑(𝑥, 𝑦) = 𝑥 − 𝑦
+1. identify the 𝑘 nearest neighbours (according to 𝑑) out of the 𝑁 training samples
+2. out of these 𝑘 samples, identify the number of patterns 𝑛𝑖
+that belong to every class 𝜔𝑖, 𝑖 = 1, 2, … , 𝑀
+3. assign 𝑥 to the class 𝜔𝑗 such that 𝑛𝑗 = max{𝑛1, 𝑛2, … , 𝑛𝑘}
+• kNN is considered a lazy learning algorithm
+– There is no training, or data abstraction/modeling, step
+– Defers data processing until it receives a request to classify an unlabelled sample
+– The full training dataset is needed, but the classification depends only on the 𝑘 neighbours
+• There is a single parameter 𝑘
+?
+1
+2
+3
+4
+x → 1
+k = 5
+
+4
+k-Nearest Neighbours classifier
+• Examples of distance functions:
+– weighted 𝑳𝒑 metric (or Minkowski measure)
+Alberto Ortiz (last update 15/12/2025)
+
+
+Alberto Ortiz (last update 15/12/2025) 5
+k-Nearest Neighbours classifier
+• To avoid ties, k is typically chosen odd for two-class problems, and, in general, not to 
+be a multiple of the number of classes M
+• Even with this, ties may arise: 𝑛1(𝑥) = 𝑛4(𝑥)
+– Ties may be broken arbitrarily
+– The unlabeled sample x may be assigned to the 
+class of the nearest neighbor
+• consider all classes
+• consider only the classes with the tying values
+– Instead of every sample voting 1, make use of a 
+weighted vote inversely proportional 
+to the distance:
+?
+1
+2
+3
+4
+x → 3
+x → 4
+x → 4
+?
+1
+2
+3
+4
+k = 5 k = 5
+
+Alberto Ortiz (last update 15/12/2025) 6
+k-Nearest Neighbours classifier
+• An example: 3 classes, 60 samples/class, white = unclassified, i.e. kNN voting tied
+5NN
+classification map
+original dataset
+
+Alberto Ortiz (last update 15/12/2025) 7
+k-Nearest Neighbours classifier
+• Nearest neighbour is competitive:
+• Other theoretical results: 
+– e.g. error is less than twice the optimal classification error (Bayes error)
+Yann LeCunn – MNIST Digit Recognition
+– Handwritten digits
+– 28x28 pixel images: d = 784
+– 60,000 training samples
+– 10,000 test samples
+(http://yann.lecun.com/exdb/mnist/)
+Test Error Rate (%)
+Linear classifier (1-layer NN) 12.0
+3-nearest-neighbors, Euclidean 5.0
+3-nearest-neighbors, Euclidean, deskewed 2.4
+1-NN, Tangent Distance, 16x16 1.1
+1000 RBF + linear classifier (10 neurons) 3.6
+SVM deg 4 polynomial 1.1
+2-layer NN, 300 hidden units 4.7
+2-layer NN, 300 HU, [deskewing] 1.6
+LeNet-5, [distortions] 0.8
+Boosted LeNet-4, [distortions] 0.7
+
+
+Alberto Ortiz (last update 15/12/2025) 8
+k-Nearest Neighbours classifier
+• The simplest version of the algorithm is the nearest neighbour classifier (1NN)
+Assign 𝑥 to the class 𝑤𝑗 of its nearest neighbour
+• Systematic application of the rule throughout the feature space gives rise to the 
+Voronoi tessellation/diagram
+– shows the points of the feature space which are closest to every sample and therefore 
+“inherit” its label
+1NN
+Voronoi tesselation
+ties are less likelier !!
+
+Alberto Ortiz (last update 15/12/2025) 9
+k-Nearest Neighbours classifier
+• In the kNN algorithm, the greatest effort is placed on the classification not on the 
+training:
+– Given a pattern 𝑥 to classify, one has to calculate the distance 𝑑(𝑥, 𝑥𝑖) from 𝑥 
+to any of the 𝑁 patterns 𝑥𝑖 in the full dataset and keep the 𝑘 nearest patterns 
+according to 𝑑 (brute force approach)
+– High computational cost for 𝑁 large: e.g. 𝑘 = 1, 𝑁 = 106  106 comparisons
+• kNN and 1NN are similar in terms of efficiency
+– retrieving the 𝑘 nearest neighbors is not much more expensive than retrieving a 
+single nearest neighbor
+– 𝑘 nearest neighbors can be maintained in a sorted queue
+• A number of ways of reducing the search cost
+– Handle the dataset with the goal of reducing the search complexity, e.g. use a k-d tree or 
+a ball-tree, use approximate nearest neighbour search (ANN), etc.
+– Reduce the size of the dataset without significantly altering the classification accuracy
+
+Alberto Ortiz (last update 15/12/2025) 10
+Contents
+• k-Nearest Neighbours classifier
+• Supplementary material: Nearest-Neighbour Search & k-d trees
+• Condensed Nearest Neighbours
+• Example of use
+
+Alberto Ortiz (last update 15/12/2025) 11
+k-d trees
+• A k-d tree is a binary tree to store a set of k-dimensional points in an “ordered” way 
+• Every non-leaf node generates a splitting hyperplane along one axis, which divides 
+the space into two parts, known as half-spaces
+– Points to the left of the hyperplane (for that axis) fall within the left subtree and 
+points to the right of the hyperplane (for that axis) fall within the right subtree 
+– The splitting axis is chosen such that every node is associated with one of the k 
+dimensions, with the hyperplane perpendicular to that dimension's axis 
+• e.g. if for a particular split the x1 axis is chosen, all points in the subtree with a smaller x1 value 
+than the node’s x1 value will appear in the left subtree and all points with larger x1 value will be in 
+the right subtree. In such a case, the hyperplane would be defined by the x1-value of the node, 
+and its normal would be the unit x1-axis.
+(7,2)
+(5,4) (9,6)
+(8,1)(2,3) (4,7)
+x1
+x2
+X = {(2,3), (5,4), (9,6), (4,7), (8,1), (7,2)}
+ [x1] 
+(7,2)
+ [x2] 
+(5,4)
+ [x2] 
+(9,6)
+
+Alberto Ortiz (last update 15/12/2025) 12
+k-d trees
+• There are many possible ways to choose axis-aligned splitting planes, and so there 
+are many different ways to construct k-d trees
+• The canonical method of k-d tree construction has the following constraints:
+– The splitting axis changes sequentially from level to level: 
+first level – x1, second level – x2, etc. (start again with x1 when the k-th level is reached)
+– Split is performed at the median of the subtree values for the chosen axis
+– This method leads to a balanced k-d tree: all leaf nodes approx. equally closer to the root
+(7,2)
+(5,4) (9,6)
+(8,1)(2,3) (4,7)
+x1
+x2
+X = {(2,3), (5,4), (9,6), (4,7), (8,1), (7,2)}
+(2) [L] choose axis x2 and take the median of
+ {3,4,7} → 4 → (5,4)
+ left subtree: (2,3)
+ right subtree: (4,7)
+(1) choose axis x1 and take the median of
+ {2,5,9,4,8,7} → {2,4,5,7,8,9} → 7 → (7,2)
+ left subtree: {(2,3), (5,4), (4,7)}
+ right subtree: {(9,6), (8,1)}
+(3) [R] choose axis x2 and take the median of 
+ {6,1} → {1,6} → 6 → (9,6)
+left subtree: (8,1)
+
+Alberto Ortiz (last update 15/12/2025) 13
+k-d trees
+• Another popular method:
+– Choose the splitting axis according to the spread (var / range) of the data along each axis
+– Choose the split value as the average of values for the chosen axis and subtree
+– This method avoids the sort operation to find the median
+– Besides, samples are stored only at the leafs, not throughout the tree
+X = {(2,3), (5,4), (9,6), (4,7), (8,1), (7,2)}
+(2L) s1 = range{2,5,4} = 5 - 2 = 3, 1 = 3.67
+ s2 = range{3,4,7} = 7 - 3 = 4, 2 = 4.67
+ choose axis x2 and split at x2 = 4.67
+ left subtree: {(2,3),(5,4)}
+ right subtree: (4,7)
+(1) s1 = range{2,5,9,4,8,7} = 9 - 2 = 7, 1 = 5.83
+ s2 = range{3,4,6,7,1,2} = 7 - 1 = 6, 2 = 3.83
+ choose axis x1 and split at x1 = 5.83
+ left subtree: {(2,3), (5,4), (4,7)}
+ right subtree: {(9,6), (8,1),(7,2)}
+(3R) s1 = range{9,8,7} = 9 - 7 = 2, 1 = 8
+ s2 = range{6,1,2} = 6 - 1 = 5, 2 = 3
+ choose axis x2 and split at x2 = 3
+ left subtree: {(8,1), (7,2)}
+ right subtree: (9,6)
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+
+Alberto Ortiz (last update 15/12/2025) 14
+k-d trees
+• Growth of the tree can be stopped at any level: there can be more than 1 sample per leaf
+• Growth can also continue until the number of samples per leaf is below a threshold
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+
+
+
+
+
+
+ 
+ 
+
+Alberto Ortiz (last update 15/12/2025) 15
+k-d trees
+• Nearest-neighbor search (2nd k-d tree construction approach):
+• remark: algorithm slightly different when there are samples at intermediate nodes
+node {
+int axis; // splitting axis
+real value; // splitting value
+node left; // left subtree
+node right; // right subtree
+kdpoint point; // if leaf node
+}
+NNS(q:in kdpoint, n:in node, b:inout point, r:inout real) 
+{
+if n.left = empty & n.right = empty then // it is a leaf node (only 1 sample/leaf)
+r_ = dist(q, n.point);
+if r_ < r then r = r_; b = n.point;  // update nearest 
+else // find first subtree to look into
+if q(n.axis) <= n.value then // use splitting axis, visit subtrees in proper order
+NNS(q, n.left, b, r);  // look within left subtree
+if q(n.axis) + r >  n.value then NNS(q, n.right, b, r); // NN can be in right subtree
+else
+NNS(q, n.right, b, r); // look within right subtree
+if q(n.axis) – r <= n.value then NNS(q, n.left, b, r);  // NN can be in left subtree
+}
+initial call: NNS(q, root, b, inf);
+search
+pruning
+
+Alberto Ortiz (last update 15/12/2025) 16
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+
+Alberto Ortiz (last update 15/12/2025) 17
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+1 < 3
+
+Alberto Ortiz (last update 15/12/2025) 18
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+1 < 3
+1 < 1.5
+
+Alberto Ortiz (last update 15/12/2025) 19
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+1 < 3
+1 < 1.5
+r1 = 2
+
+Alberto Ortiz (last update 15/12/2025) 20
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+1 < 3
+1 < 1.5
+r1 = 2
+L: 1+2 > 1.5
+
+Alberto Ortiz (last update 15/12/2025) 21
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+1 < 3
+1 < 1.5
+r1 = 2
+L: 1+2 > 1.5
+r2 = 1.4
+
+Alberto Ortiz (last update 15/12/2025) 22
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+1 < 3
+1 < 1.5
+r1 = 2
+L: 1+2 > 1.5
+r2 = 1.4
+L: 1+1.4 < 3
+
+Alberto Ortiz (last update 15/12/2025) 23
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+R: 6 - 1.4 < 5.83
+r1 = 2 r2 = 1.4
+
+Alberto Ortiz (last update 15/12/2025) 24
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+R: 6 - 1.4 < 5.83
+1 < 4.67
+r1 = 2 r2 = 1.4
+
+Alberto Ortiz (last update 15/12/2025) 25
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+R: 6 - 1.4 < 5.83
+1 < 4.67
+r1 = 2 r2 = 1.4
+6 > 3.5
+
+Alberto Ortiz (last update 15/12/2025) 26
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+R: 6 - 1.4 < 5.83
+1 < 4.67
+r1 = 2 r2 = 1.4
+6 > 3.5
+d = 3.16 > 1.4
+
+Alberto Ortiz (last update 15/12/2025) 27
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+R: 6 - 1.4 < 5.83
+1 < 4.67
+r1 = 2 r2 = 1.4
+6 > 3.5
+d = 3.16 > 1.4
+R: 6-1.4 > 3.5
+
+Alberto Ortiz (last update 15/12/2025) 28
+k-d trees
+• q = (6,1)
+• r0 = 
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+6 > 5.83
+R: 6 - 1.4 < 5.83
+1 < 4.67
+r1 = 2 r2 = 1.4
+6 > 3.5
+d = 3.16 > 1.4
+R: 6-1.4 > 3.5
+L: 1+1.4 < 4.67
+
+Alberto Ortiz (last update 15/12/2025) 29
+k-d trees
+• q = (6,1) → NN = (7,2), dist = 1.4
+• r0 = 
+• 11 nodes in the tree, 8 visited, 3 distance calculations
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+r1 = 2 r2 = 1.4d = 3.16 > 1.4
+
+Alberto Ortiz (last update 15/12/2025) 30
+k-d trees
+• Another example: q = (9,2) 
+• NN = (8,1), dist = 1.4
+• 11 nodes in the tree, 6 visited
+2 distance calculations
+x1 = 5.83
+x2 = 4.67 x2 = 3
+(4,7) (9,6)x1 = 3.5 x2 = 1.5
+(7,2)(8,1)(5,4)(2,3)
+r2 = 1.4 r1 = 2
+2 – 2 < 1.5
+2 + 1.4 < 3
+d = 4 > 1.4
+9 – 1.4 > 5.83
+
+Alberto Ortiz (last update 15/12/2025) 31
+k-d trees
+• A larger example:
+– N = 106 samples randomly generated
+– searching for q = (0.29514, 0.897237, 0.941998) randomly generated
+– found NN = (0.296093, 0.896173, 0.948082) at distance 0.00624896
+– visited 44 nodes
+• For 1NN, time complexity is O(N) in the worst case, but on average is O(log2 N)
+• If there are multiple samples at the leaves, then the nearest neighbor must be 
+searched among all of them:
+nearest(q:in kdpoint, n:in node, b:inout point, r:inout real) 
+{
+if n.left = empty & n.right = empty then // it is a leaf node (m samples/leaf)
+for every sample i at node n
+r_ = dist(q, n.points[i]);
+if r_ < r then r = r_; b = n.points[i];  // update nearest 
+[…]
+}
+node {
+int axis; // splitting axis
+real value; // splitting value
+node left; // left subtree
+node right; // right subtree
+kdpoint points[m]; // if leaf node, a maximum of m nodes
+}
+
+Alberto Ortiz (last update 15/12/2025) 32
+k-d trees
+• The algorithm can be extended in several ways by simple modifications: 
+– To search for the k nearest neighbours
+• maintain k current best instead of just one
+• prune a branch search only when k points have been found and the branch cannot 
+have points closer than any of the k current bests
+• For kNN , time complexity is O(kN) in the worst case, but on average is O(k log2 N)
+– It can also be converted to approximate nearest neighbour search to run faster, e.g.
+• set an upper bound on the number of points to examine in the tree, or 
+• interrupt the search based upon a real time clock 
+(may be more appropriate in hardware implementations) 
+• Some recommendations:
+– For small datasets and reduced dimensionality, brute force performs well
+– If data is sparse with reduced dimensionality (< 20), k-d tree performs better than ball-
+trees
+– As the number of neighbours k increases, the query time of both k-d trees and ball-trees 
+increases
+
+Alberto Ortiz (last update 15/12/2025) 33
+Contents
+• k-Nearest Neighbours classifier
+• Supplementary material: Nearest-Neighbour Search & k-d trees
+• Condensed Nearest Neighbours
+• Example of use
+
+Alberto Ortiz (last update 15/12/2025) 34
+Condensed Nearest Neighbour
+• Another alternative to decrease the cost of an NN search is to reduce the size of the 
+training set without significantly altering the classification accuracy. 
+• Condensed Nearest Neighbour (CNN): 
+Use a set of prototypes U  X to classify, instead of the full set X
+1. Remove outliers: go through X, checking whether it would be recognized as the correct 
+class; if not, then it is an outlier and it is removed from X
+2. U = {random point from X}
+3. Build the prototype set U: go through X, picking any point and checking whether it is 
+recognized as the correct class according to U and 1-NN; if it is, then it is an absorbed 
+point (i.e. interior point); if not, it is transferred to the prototype set U (i.e. border point)
+4. Repeat 3 until no more prototypes are transferred to U
+z = outlier
+x, y = prototypes
+q = absorbed
+y
+x
+q
+z
+stage 1:
+discard
+outliers
+stage 2:
+choose
+prototypes
+
+Alberto Ortiz (last update 15/12/2025) 35
+Condensed Nearest Neighbour
+• An example (cntd.)
+original dataset
+- prototype
+- outlier
+- absorbed
+
+
+Alberto Ortiz (last update 15/12/2025) 36
+Contents
+• k-Nearest Neighbours classifier
+• Supplementary material: Nearest-Neighbour Search & k-d trees
+• Condensed Nearest Neighbours
+• Example of use
+
+Alberto Ortiz (last update 15/12/2025) 37
+Example of use
+• Example with scikit-learn:
+model = KNeighborsClassifier(n_neighbors, weights, algorithm, 
+    leaf_size, metric, p)
+n_neighbours: number of neighbours to be used for prediction, e.g. 5
+weights: weight function used in prediction, posible values
+• ‘uniform’: all points of the k-neighbourhood weigh the same
+• ‘distance’: points are weighted by the inverse of their distance
+algorithm: ‘auto’, ‘ball_tree’, ‘kd_tree’, ‘brute’
+leaf_size: size of the leaf nodes for ball trees and kd-trees, e.g. 30
+metric: ‘euclidean’, ‘manhattan’, ‘chevyshev’, ‘minkowski’
+p: power for the Minkowski metric, e.g. 2
+from sklearn.neighbors import KNeighborsClassifier
+clf = KNeighborsClassifier(n_neighbors=5, weights=‘uniform’, metric = 
+‘euclidean’)
+clf.fit(X_train,y_train)
+y_test = clf.predict(X_test)
+https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
+
+Instance-based learning:
+k-Nearest Neighbours
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

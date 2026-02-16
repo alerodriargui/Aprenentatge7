@@ -1,0 +1,488 @@
+Lecture 3.2
+Supervised learning:
+Regression
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+
+Alberto Ortiz (last update 2/11/2025)
+Contents
+• Introduction
+• Linear regression
+• Polynomial regression
+• Gradient descent methods
+• Logistic regression
+2
+
+Alberto Ortiz (last update 2/11/2025)
+Introduction
+• Task: Learn/regress a function
+• Goal: Be able to predict 𝑓
+for any 𝑥 in the domain
+i.e. learn the parameters of a model
+
+
+
+• A regression model is said to be linear
+if it is expressed by a linear function  & 
+or non-linear 
+• Regression can also be non-parametric 
+ 
+
+
+3
+
+Alberto Ortiz (last update 2/11/2025)
+Contents
+• Introduction
+• Linear regression
+• Polynomial regression
+• Gradient descent methods
+• Logistic regression
+4
+
+Alberto Ortiz (last update 2/11/2025)
+Linear regression
+• We consider a linear model such as the following:
+– We assume our dataset consists of a collection of 𝑁 pairs (𝑥𝑖, 𝑦𝑖) with 𝑥𝑖 = (𝑥𝑖1, … , 𝑥𝑖𝐿)
+• We next define the sum of squared residuals, also known as the residual sum of squares 
+(RSS), as:
+• And now we adopt a least squares formulation to find out 𝜃:
+– The term  
+1
+2 σ 𝑦𝑖 − 𝑓(𝑥𝑖) 2 is known as the least squares loss
+(or loss function in general, also known as the risk or cost function)
+– Hence, we intend to find the minimizer 𝜃 of the loss function
+5
+
+Alberto Ortiz (last update 2/11/2025)
+Linear regression
+• A simple case with one feature (𝐿 = 1):
+– Our data consists of pairs 𝑥𝑖, 𝑦𝑖 , 𝑖 = 1, … , 𝑁
+• Therefore:
+and the least squares formulation becomes into:
+• This is an optimization
+problem with one single
+minimum at መ𝛽0, መ𝛽1
+𝑥
+𝑦
+𝑥𝑖, 𝑦𝑖
+6
+
+Alberto Ortiz (last update 2/11/2025)
+Linear regression
+7
+
+Alberto Ortiz (last update 2/11/2025)
+Linear regression
+• Taking derivatives and setting them equal to zero:
+8
+
+Alberto Ortiz (last update 2/11/2025)
+Linear regression
+• It is even possible to estimate the reliability of these estimates through the so-called standard 
+errors (SE, i.e. how far to the true value is the estimate):
+where 𝜎𝑀
+2 is the variance of the noise of the model 𝜖, i.e. 𝑦 = 𝛽0 +  𝛽1𝑥 + 𝜖,
+and ҧ𝑥 =  Τσ𝑖 𝑥𝑖 𝑁
+𝜎𝑀 is a priori unknown but can be estimated from the data by means of the residual 
+standard error (RSE):
+• Then, we can set e.g. 95% confidence intervals (approximate) for the model parameters:
+• The R2 statistic (∈ [0,1]) is an alternative measure of fit
+– The closer to 1, the better is the fit
+– Also known as coefficient of determination
+– Represents the percentage of variance explained by the model
+9
+
+Alberto Ortiz (last update 2/11/2025)
+Linear regression
+• Example. Let us consider the advertising dataset, with observed sales for a given product (as 
+thousands of units sold) for 200 markets as a function of the budget in TV advertising (in $1K)
+• Using the expressions for መ𝛽0, መ𝛽1we obtain:
+while the 95% confidence intervals and the R2 statistic are:
+import numpy as np
+from math import sqrt
+import pandas as pd
+# www.kaggle.com/datasets/ashydv/advertising-dataset
+df = pd.read_csv('datasets/advertising.csv')
+print(df.info())
+x = df['TV'].to_numpy()
+y = df['sales'].to_numpy()
+sx = x.sum()
+sy = y.sum()
+sxy = np.sum(np.multiply(x, y))
+sx2 = np.sum(x**2)
+N = x.shape[0]
+b0 = (sy*sx2 - sx*sxy) / (N*sx2 - sx**2)
+b1 = (N*sxy - sx*sy) / (N*sx2 - sx**2)
+yp = b0 * np.ones((N,)) + b1 * x
+rss = np.sum((y - yp)**2)
+sm2 = rss / (N-2)
+xb = sx / N
+xvar = np.sum( (x - xb * np.ones((N,))) ** 2 )
+seb0 = sqrt(sm2 * sx2 / (N * xvar))
+seb1 = sqrt(sm2 / xvar)
+cib0 = [b0 - 2*seb0, b0 + 2*seb0]
+cib1 = [b1 - 2*seb1, b1 + 2*seb1]
+tss = N * np.var(y)
+R2 = 1 – rss / tss
+𝐶𝐼 ෠𝛽0 = 6.1169, 7.9483
+𝑆𝐸 ෠𝛽0 = 0.4578 
+𝑅2 = 0.6118
+𝑆𝐸 ෠𝛽1 = 0.0027
+𝐶𝐼( ෠𝛽1) = [0.0422, 0.0529]
+෠𝛽0 = 7.0326 ෠𝛽1 = 0.0475
+10
+
+Alberto Ortiz (last update 2/11/2025)
+Linear regression
+• With more than one feature (multiple linear regression):
+• To solve for 𝜃 in
+we can adopt matrix notation:
+11
+
+Alberto Ortiz (last update 2/11/2025)
+Linear regression
+• Taking derivatives and setting them equal to zero as before:
+(since Τ𝜕2𝐿 𝜕𝜃2 = 𝑋𝑇𝑋 is positive definite, it is ensured that the optimum is a minimum)
+• Matrix 𝑋+ = 𝑋𝑇𝑋 −1𝑋𝑇 is named as the (Moore-Penrose) pseudo-inverse of matrix 𝑋
+• Example Let us consider the full advertising dataset, which contains budget data for TV, radio 
+and newspapers advertising, and let us find the fitting hyperplane
+import numpy as np
+import pandas as pd
+df = pd.read_csv('datasets/advertising.csv')
+print(df.info())
+X = df[['TV','radio','newspaper']].to_numpy()
+y = df['sales'].to_numpy()
+N = X.shape[0]
+X_ = np.hstack((np.ones((N,1)), X))
+S = np.matmul(X_.T, X_)
+Xp = np.matmul(np.linalg.inv(S), X_.T)
+th = np.matmul(Xp, y)
+rmse = sqrt(((y - X_ @ th) ** 2).sum() / N)
+Xp = np.linalg.pinv(X_)
+th = np.matmul(Xp, y)
+Alternatively:
+12
+
+Alberto Ortiz (last update 2/11/2025)
+Contents
+• Introduction
+• Linear regression
+• Polynomial regression
+• Gradient descent methods
+• Logistic regression
+13
+
+Alberto Ortiz (last update 2/11/2025)
+Polynomial regression
+• Special case of multiple linear regression which estimates the relationship as an n-th degree 
+polynomial:
+• In general:
+• This is also a case of linear regression 
+since we can write:
+14
+
+
+Alberto Ortiz (last update 2/11/2025)
+Polynomial regression
+• In the multivariate/multiple linear regression case, the number of coefficients grows 
+significantly, but it is the same kind of optimization problem 
+e.g. for two features 𝑥1 and 𝑥2 and a polynomial of degree 2
+15
+
+Alberto Ortiz (last update 2/11/2025)
+Polynomial regression
+• Scikit-learn deals with this latter case as if it was a first-degree polynomial (uni- or multi-
+variate):
+import pandas as pd
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+df = pd.read_csv("datasets/advertising.csv")
+x = df["TV"].to_numpy()
+y = df["sales"].to_numpy()
+x = x.reshape(-1,1)
+trf = PolynomialFeatures(degree=3, include_bias=True)
+trf.fit(x)
+x_ = trf.transform(x)
+lr = LinearRegression()
+lr.fit(x_, y)
+theta = [lr.intercept_, lr.coef_]
+R2 = lr.score(x_, y)
+print("R2 = %f" % (R2))
+yp = lr.predict(x_)
+rmse = mean_squared_error(y, yp, squared=False)
+print("RMSE = %f" % (rmse))
+R2   = 0.6220
+RMSE = 3.1997
+X = df[["TV","radio",
+"newspaper"]].to_numpy()
+y = df["sales"].to_numpy()
+trf = PolynomialFeatures(degree=2, 
+include_bias=False)
+trf.fit(X)
+X_ = trf.transform(X)
+lr = LinearRegression()
+lr.fit(X_, y)
+R2   = 0.9865
+RMSE = 0.6046
+trf = PolynomialFeatures(degree=3,
+include_bias=True)
+trf.fit(x)
+x_ = trf.transform(x)
+theta = np.linalg.pinv(x_) @ y
+ALSO:
+16
+
+Alberto Ortiz (last update 2/11/2025)
+Contents
+• Introduction
+• Linear regression
+• Polynomial regression
+• Gradient descent methods
+• Logistic regression
+17
+
+Alberto Ortiz (last update 2/11/2025)
+Gradient descent
+• Gradient descent is an iterative optimization method that results particularly useful when the 
+optimization problem does not have a closed-form solution (unlike linear regression), 
+e.g. non-linear optimization
+•  is named as the learning rate
+– Fraction of the derivative that is used to update the parameter
+• The same approach can be adopted for 𝛽1:
+─ Both 𝛽0 and 𝛽1 are updated simultaneously at every iteration
+𝐿
+𝛽0𝛽0(𝑡) 
+18
+
+Alberto Ortiz (last update 2/11/2025)
+Gradient descent
+• For the 1D linear regression case (this is not a non-linear optimization case, but we will use it 
+to illustrate the optimization scheme):
+• In the general multi-dimensional case, the set of parameters is updated using the gradient 
+vector ∇𝐿 = Τ𝜕𝐿 𝜕𝛽0, Τ𝜕𝐿 𝜕𝛽1, … , Τ𝜕𝐿 𝜕𝛽𝐿 :
+19
+
+Alberto Ortiz (last update 2/11/2025)
+Gradient descent
+• Hence, the full optimization scheme consists in:
+def gdlinreg(X, y, alpha, tol, tmax):
+N = X.shape[0]
+th,th0 = np.zeros(4),np.zeros(4)
+for _ in range(tmax):  # grad. desc. iter.
+sgrad,grad = np.zeros(4),np.zeros(4)
+for i in range(N): # loop over samples
+x = X[i,:]
+yp = th[0] + th[1]*x[0] + \
+th[2]*x[1] + th[3]*x[2]
+e = (yp - y[i])
+grad[0] = e
+grad[1] = e * x[0]
+grad[2] = e * x[1] 
+grad[3] = e * x[2]
+sgrad += grad
+th = th - alpha * sgrad # update rule
+if np.max(np.abs(th - th0)) < tol:
+break
+else:
+th0 = th.copy()
+return th
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+df = pd.read_csv('datasets/advertising.csv')
+print(df.info())
+X = df[['TV','radio','newspaper']].to_numpy()
+y = df['sales'].to_numpy()
+N = X.shape[0]
+sc = MinMaxScaler()
+Xhat = sc.fit_transform(X)
+th = gdlinreg(Xhat, y, 0.0001, 1e-3, 2000)
+th[0] -= th[1]*sc.min_[0]*sc.scale_[0] \
+- th[2]*sc.min_[1]*sc.scale_[1] \
+- th[3]*sc.min_[2]*sc.scale_[2]    
+th[1] *= sc.scale_[0]
+th[2] *= sc.scale_[1]
+th[3] *= sc.scale_[2]
+X_ = np.hstack((np.ones((N,1)), X))
+rmse = sqrt(((y - X_ @ th) ** 2).sum() / N)
+print('RMSE = %f' % (rmse))
+20
+
+Alberto Ortiz (last update 2/11/2025)
+Gradient descent
+• Using scikit-learn:
+(continued)
+from sklearn.linear_model import SGDRegressor
+sgd = SGDRegressor(loss='squared_error')
+sgd.fit(Xhat, y)
+th = np.zeros(4)
+th[0] = sgd.intercept_ - sgd.coef_[0]*sc.min_[0]*sc.scale_[0] \
+- sgd.coef_[1]*sc.min_[1]*sc.scale_[1] \
+- sgd.coef_[2]*sc.min_[2]*sc.scale_[2]    
+th[1] = sgd.coef_[0]*sc.scale_[0]
+th[2] = sgd.coef_[1]*sc.scale_[1]
+th[3] = sgd.coef_[2]*sc.scale_[2]
+X_ = np.hstack((np.ones((N,1)), X))
+rmse = sqrt(((y - X_ @ th) ** 2).sum() / N)
+print('RMSE = %f' % (rmse))
+21
+
+Alberto Ortiz (last update 2/11/2025)
+Gradient descent
+• Pros and Cons of both optimization approaches:
+Analytical approach (normal equation)
+(+) No need to specify a learning rate nor iterate
+(-) Requires a loss function whose derivative exists and 
+leads to a solvable system of equations
+(-) Works only if the pseudo-inverse can be calculated
+(i.e. 𝑋𝑇𝑋 is invertible)
+Iterative approach (gradient descent)
+(+) Generic approach for every loss function provided the 
+derivative exists
+(+) Effective in high dimensions provided there is enough 
+gradient for the updates to happen, i.e. learning to occur    
+(= problems with plateaus)
+(-) May require many iterations to converge
+(-) Requires to set up 𝜽(𝟎) before starting the iterative 
+process
+(-) Problems with local minima
+(-) Requires to set up the learning rate 𝛼, do not use a 
+learning rate that is too small or too large
+22
+
+Alberto Ortiz (last update 2/11/2025)
+Contents
+• Introduction
+• Linear regression
+• Polynomial regression
+• Gradient descent methods
+• Logistic regression
+23
+
+Alberto Ortiz (last update 2/11/2025)
+Logistic regression
+• This is a classification method that adopts a regression approach to fit a classification 
+function. We will consider a two-class problem:
+– The output is real (regression), but is bounded (classification)
+• Does it make sense to use linear regression?
+– Yes, but: 
+1. Although y ∈ 0,1 , a priori 𝑓(𝑥) takes real values not discrete labels
+2. The linear regression model does not ensure boundness, 
+i.e. we need 0 ≤ 𝑓 𝑥 ≤ 1 but the regressed 𝑓(𝑥) can take values out of [0,1]
+24
+
+Alberto Ortiz (last update 2/11/2025)
+Logistic regression
+• It is better to adopt a function that ensures boundness, e.g. a sigmoid function 
+(i.e. a S-shaped function) named as the logistic function:
+– For 𝐾 = 1, 
+𝑔 𝑧 → 1 𝑤ℎ𝑒𝑛 𝑧 → +∞ and 
+𝑔 𝑧 → 0 𝑤ℎ𝑒𝑛 𝑧 → −∞
+• In the logistic regression case:
+For the 1D case:
+25
+
+Alberto Ortiz (last update 2/11/2025)
+Logistic regression
+• Now, we have:
+• Because of the presence of 𝑔(𝑥𝑖), the loss 𝐿(𝜃) is not the same kind of function as for the 
+case of linear regression and hence the least squares loss becomes less appropriate
+– The loss function is now a more complex non-linear function
+– There may be many local optima, hence gradient descent is not ensured to find the global optimum
+• The binary cross-entropy loss function 
+is used instead:
+26
+
+Alberto Ortiz (last update 2/11/2025)
+Logistic regression
+• To learn the set of parameters 𝜃, we can adopt gradient descent, which results in a quite 
+convenient optimization scheme:
+27
+
+Alberto Ortiz (last update 2/11/2025)
+Logistic regression
+• Multi-class logistic regression adopts the (categorical) cross-entropy loss. For 𝑴 classes:
+where 𝑡𝑖 is the one-hot encoding for sample 𝑥𝑖.
+• The gradient descent scheme requires the regression of 𝑔𝑘 functions (𝑘 = 1, … , 𝑀), 
+one 𝑔 function per class
+28
+
+Alberto Ortiz (last update 2/11/2025)
+Logistic regression
+• Example
+(“manual” gradient descent)
+0.9733
+def gdlogreg(X, t, alpha, tol, tmax):
+N, L, M = X.shape[0], X.shape[1], t.shape[1] 
+th,th0 = np.zeros((L+1,M)),np.zeros((L+1,M))
+for _ in range(tmax):     # gradient descent iter.
+sgrad = np.zeros((L+1,M))
+grad = np.zeros((L+1,M))
+for i in range(N):      # loop over the samples
+x = np.array([1,X[i,0],X[i,1],X[i,2],X[i,3]])
+for c in range(M):    # loop over the classes
+z = np.dot(th[:,c], x)
+that = 1/(1 + exp(-z))
+e = (that - t[i,c])
+grad[:,c] = e * x   # grad. of all coeff.
+sgrad += grad
+th = th - alpha * sgrad # update rule
+if np.max(np.abs(th - th0)) < tol:
+break
+else:
+th0 = th.copy()
+return th
+import numpy as np
+from math import exp
+from sklearn.datasets import load_iris
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import OneHotEncoder
+X, y = load_iris(return_X_y=True)
+y_ = np.expand_dims(y, axis=-1)
+ohe = OneHotEncoder()
+ohe.fit(y_)
+yenc = ohe.transform(y_).toarray()
+th = gdlogreg(X, yenc, 0.0001, 1e-4, 3000)
+ypred = logregpred(X, th)
+print(accuracy_score(y, ypred))
+ def logregpred(X, th):
+N, M = X.shape[0], th.shape[1]
+ypred = np.zeros(N)
+for i in range(N):   # loop over the samples
+x = np.array([1,X[i,0],X[i,1],X[i,2],X[i,3]])
+that = np.zeros(M)
+for c in range(M): # loop over the classes
+z = np.dot(th[:,c], x)
+that[c] = 1/(1 + exp(-z))
+ypred[i] = np.argmax(that) # prediction
+return ypred
+ 29
+
+Alberto Ortiz (last update 2/11/2025)
+Logistic regression
+• Example (scikit-learn)
+from sklearn.datasets import load_iris
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+X, y = load_iris(return_X_y=True)
+clf = LogisticRegression()
+clf.fit(X, y)
+ypred = clf.predict(X)
+print(accuracy_score(y, ypred))
+0.9733
+30
+
+Lecture 3.2
+Supervised learning:
+Regression
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

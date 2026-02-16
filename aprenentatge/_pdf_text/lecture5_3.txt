@@ -1,0 +1,546 @@
+Unsupervised Learning:
+Optimization-based clustering
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+Alberto Ortiz (last update 19/01/2026) 2
+Contents
+• Introduction
+• Membership-based clustering
+• Possibilistic clustering
+• Supplementary material: Mixture models
+
+3
+Introduction
+• These clustering approaches (most popular in unsupervised learning) can be stated 
+as the optimization of a cost function J using differential calculus techniques
+• The cost function J is defined in terms of the data set X = {x1, x2, …, xN} and the 
+clustering R = {C1, C2, …, CM}, for a predefined number of clusters M:
+• Each cluster Cj is defined in terms of a set of parameters j, which in turn depend on 
+the features of the cluster we look for
+– e.g. j can be a point in L-dimensional space corresponding to the centroid of the cluster
+• Therefore, the problem becomes into the determination of the optimum set of 
+parameters :
+• Due to this optimization-based nature, with these algorithms, all the samples of the 
+data set 𝑋 are involved in the computation of the parameters of the clusters.
+Alberto Ortiz (last update 19/01/2026)
+
+
+Alberto Ortiz (last update 19/01/2026) 4
+Contents
+• Introduction
+• Membership-based clustering
+• Possibilistic clustering
+• Supplementary material: Mixture models
+
+5
+Membership-based clustering
+• In a first version, these algorithms define the cost function in the following terms:
+– where 𝑢𝑖𝑗 = 1 if sample 𝑥𝑖 is assigned to cluster 𝐶𝑗, otherwise 𝑢𝑖𝑗 = 0
+– 𝐽 is optimized with respect to 𝑈 = {𝑢𝑖𝑗} and 𝜃 = {𝜃𝑗}.
+ The clustering problem becomes into the determination of optimum 𝑈 and 𝜃.
+• if  is DM, the problem is min 𝐽; if  is SM, the problem is max 𝐽
+• Example: given 𝑁 = 5 and 𝑀 = 2, the following describes an optimum clustering  
+Alberto Ortiz (last update 19/01/2026)
+C1
+C2
+i.e. 𝑢11 = 1, 𝑢12 = 0
+
+6
+Membership-based clustering
+• The previous problem, in which each sample belongs to exclusively one single 
+cluster, is known as hard or crisp clustering:
+• To find the optimum 𝑈 = {𝑢𝑖𝑗} and 𝜃 = {𝜃𝑗}, we can use differential calculus for 𝜃𝑗, 
+but not for 𝑢𝑖𝑗, because 𝐽 is not differentiable with respect to 𝑢𝑖𝑗  {0,1}.
+• Instead, we adopt the following (sub-optimum) rule:
+– Keeping 𝜃𝑗 constant, 𝑗 = 1, … , 𝑀, since for each 𝑥𝑖 only one 𝑢𝑖𝑗 is 1 and the others are 0, 
+we set
+since 𝐽(𝑋; 𝑈, 𝜃) is minimized if we assign each 𝑥𝑖 to its closest/most similar cluster
+Alberto Ortiz (last update 19/01/2026)
+
+
+7
+Membership-based clustering
+• If we now keep constant 𝑈 = {𝑢𝑖𝑗}, we can find 𝜃 = {𝜃𝑗} using differential calculus 
+and solving the resulting equation once  is chosen:
+• We can now state the Generalized Clustering Hard Algorithmic Scheme (GCHAS):
+Alberto Ortiz (last update 19/01/2026)
+stage 1: estimate 𝑢𝑖𝑗
+keeping 𝜃𝑗 at their 
+previous values
+stage 2: estimate 𝜃𝑗
+keeping 𝑢𝑖𝑗 at their 
+previous values
+the process can be reversed:
+set 𝜃 and next calculate 𝑈
+
+8
+Membership-based clustering
+• The most popular instance of GCHAS is the so-called K-means algorithm 
+(also known as C-means or Isodata)
+• Each cluster is represented by its centroid, 𝜃𝑗 = 𝜇𝑗, and  = 𝑑2(𝑥𝑖, 𝜇𝑗)2
+Alberto Ortiz (last update 19/01/2026)
+
+
+Alberto Ortiz / EPS (last update 19/01/2026) 9
+Membership-based clustering
+• Example: Two Gaussian classes such that
+n1 = n2 = 50 − 1 = (10,10), 1 = 2 − 2 = (5,5), 2 = 1
+initial centroids: blue squares
+6 iterations
+final centroids: 1 = (10.24, 9.89), 2 = (5.02, 4.90)
+
+10
+Membership-based clustering
+• K-means is used widely and frequently finds reasonable solutions quickly
+– It is conceptually simple as well as its implementation
+– Its time complexity is O(𝑁𝑀𝑞), where 𝑞 is the number of iterations until convergence
+• if 𝑀 <<< 𝑁 and 𝑞 <<< 𝑁, K-means becomes eligible for processing large 
+datasets
+• However, there are also major shortcomings:
+– Although K-means has been proved not to increase 𝐽 between iterations, convergence 
+to the global optimum cannot be ensured (solve for the optimum is NP-hard)
+• The outcome depends on the initial centroids
+– K-means is sensitive to outliers and noise
+– One or more clusters can be empty because of centroids too far away from any sample, 
+i.e. the cluster has a representative but comprises no samples (due to bad initialization)
+• To face these drawbacks:
+– One can run K-means several times (with different randomly chosen initial centroids) 
+and keep the clustering leading to the lowest value of the cost function 𝐽
+– K-means++ modifies the setup stage of K-means by a smarter initialization stage
+– K-medoids faces the outlier-sensitivity and naturally avoids empty clusters
+Alberto Ortiz (last update 19/01/2026)
+
+11
+Membership-based clustering
+• K-means++ as initialization of K-means
+– The intuition behind K-means++ is that spreading out the 𝑀 initial cluster centroids is 
+beneficial, e.g. at least decreases the number of iterations until convergence
+– The following pseudo-code assumes the use of a distance as the proximity measure:
+Alberto Ortiz (last update 19/01/2026)
+
+
+12
+Membership-based clustering
+• K-means++ initialization: Python code
+Alberto Ortiz (last update 19/01/2026)
+def initialize(X, K):
+    S = [X[0]]
+    for k in range(1, K):
+        D2 = numpy.array([min([numpy.inner(s-x,s-x) for s in S]) for x in X])
+        probs = D2/D2.sum() # x in S will lead to prob = 0 and will not be chosen
+        cumprobs = probs.cumsum()
+        r = scipy.rand()
+        for j,p in enumerate(cumprobs):
+            if r < p:
+                i = j
+                break
+        S.append(X[i])
+    return S example (of centroid selection):
+probs = [0.1, 0.3, 0.2, 0.4]
+cumprobs = [0.1, 0.4, 0.6, 1.0]
+if r < cumprobs[0]:
+# this event has probability 0.1
+i = 0
+elif r < cumprobs[1]: # r  cumprobs[0]
+# this event has probability 0.2
+i = 1
+elif r < cumprobs[2]: # r  cumprobs[1]
+# this event has probability 0.3
+i = 2
+elif r < cumprobs[3]: # r  cumprobs[2]
+# this event has probability 0.4
+i = 3
+0.0   0.1  0.2  0.3  0.4   0.5  0.6  0.7  0.8   0.9  1.0
+r is generated uniformly in the inteval [0,1] 
+10% probability of r falling in 1st interval
+30% probability of r falling in 2nd interval
+20% probability of r falling in 3rd interval
+40% probability of r falling in 4th interval
+40%20%30%10%
+
+Alberto Ortiz / EPS (last update 19/01/2026) 13
+Membership-based clustering
+• Example: 4 Gaussian clases, 25 samples each
+
+
+14
+Membership-based clustering
+• K-medoids – PAM (Partioning Around Medoids) algorithm
+– Each cluster is represented by a sample from 𝑋, a medoid, instead of its centroid
+– Therefore, the cost function becomes:
+where M is the set of samples which are medoids
+– At every iteration:
+1. K-medoids assigns each sample to the closest medoid ( closest cluster)
+2. K-medoids checks whether there exists a sample 𝑥𝑖 which can replace a medoid 𝑥𝑗
+and reduce 𝐽
+If this is possible, the medoid is redefined and a new iteration takes place; 
+otherwise, the process stops
+– This procedure:
+• avoids empty clusters, i.e. each cluster comprises at least one sample (= medoid),
+• tends to be less sensitive to outliers and noise
+– CLARA and CLARANS are variants of PAM intended for dealing with large datasets
+Alberto Ortiz (last update 19/01/2026)
+
+
+15
+Membership-based clustering
+• A relaxation of constraint 𝑢𝑖𝑗{0,1} leads to the so-called soft clustering problems
+• One of these problems is the fuzzy clustering problem, whose formulation is:
+where:
+–  is a DM for fuzzy clustering algorithms
+– 𝑢𝑖𝑗  [0,1] represents the grade of membership of sample 𝑥𝑖 to cluster 𝐶𝑗
+• 𝑢𝑖𝑗 is related to 𝑢𝑖𝑘, 𝑘 ≠ 𝑗 because of the constraints
+– 𝑞 is named as a fuzzyfier which gives more or less importance to 𝑢𝑖𝑗
+ reduces the influence of , what can be useful for dealing with outliers
+Alberto Ortiz (last update 19/01/2026)
+1
+ 
+N
+1                                M
+i                                       =1
+j
+ 
+0    N
+
+
+uij
+
+
+16
+Membership-based clustering
+• Now, we can find the optimum 𝑈 and 𝜃 using differential calculus:
+– To find the optimum 𝑈 = {𝑢𝑖𝑗} we need to introduce the following Lagrangian function 
+because of the constraints on 𝑢𝑖𝑗:
+– The partial derivative of L(𝑋; 𝑈, 𝜃) with respect to 𝑢𝑟𝑠 is
+– We can now equal to 0 and solve for 𝑢𝑟𝑠:
+Alberto Ortiz (last update 19/01/2026)
+
+
+17
+Membership-based clustering
+• Now, we can find optimum 𝑈 and 𝜃 using differential calculus:
+– To find the optimum 𝜃 = {𝜃𝑗} we calculate the partial derivative with respect to 𝜃𝑗and 
+equal it to 0:
+• Summing up, we have:
+• There are two issues with the expressions we have just obtained: 
+– The expression leading to the calculation of 𝜃 = {𝜃𝑗} depends on the particular proximity
+function we are using, so the derivative and the underlying equation cannot be solved in 
+general
+– Besides, the two expressions are coupled, what prevents from obtaining closed-form 
+expressions
+• REMARK: Notice that
+Alberto Ortiz (last update 19/01/2026)
+
+
+18
+Membership-based clustering
+• One way of proceeding is to employ a two-stage iterative algorithm named GCFAS
+– the algorithm can also be started from 𝑈(0) instead of 𝜃(0)
+– 𝑢𝑖𝑗 cannot be calculated for 𝑥𝑖 if 𝑗 such that (𝑥𝑖 , 𝜃𝑗(𝑡)) = 0, e.g.  is DM
+• check this case and set 𝑢𝑖𝑗 so that 𝑥𝑖 is arbitrarily shared among clusters 𝐶𝑗
+Alberto Ortiz (last update 19/01/2026)
+stage 1: estimate 𝑢𝑖𝑗
+keeping 𝜃𝑗 at their 
+previous values
+stage 2: estimate 𝜃𝑗
+keeping 𝑢𝑖𝑗 at their 
+previous values
+
+19
+Membership-based clustering
+• If 𝜃𝑗 is a point representative of cluster 𝐶𝑗, e.g. its (fuzzy) centroid, and 
+(𝑥𝑖, 𝜃𝑗(𝑡)) is the squared Euclidean distance then:
+– The resulting algorithm is named Fuzzy c-Means (FCM) or Soft / Fuzzy k-Means
+– This result is also valid if
+for 𝐴 symmetric, positive definite (i.e. all eigenvalues are positive)
+e.g. 𝐴−1 can be the fuzzy covariance matrix of 𝐶𝑗 : 
+In this case, (𝑥𝑖, 𝜃𝑗(𝑡)) is termed as the Mahalanobis distance
+Alberto Ortiz (last update 19/01/2026)
+
+
+20
+Membership-based clustering
+• Fuzzy c-Means clustering algorithm (FCM):
+Alberto Ortiz (last update 19/01/2026)
+
+
+21
+Membership-based clustering
+• Example: N = 140 samples, M = 2 clusters, q = 2
+Alberto Ortiz (last update 19/01/2026)
+
+
+22
+Membership-based clustering
+• Other FC algorithms: Gustafson-Kessel algorithm for hyperplanes clustering
+– Planar clusters are represented by centers 𝑐𝑗 and covariance matrices 𝑗, i.e. 𝜃𝑗 = (𝑐𝑗 , 𝑗)
+– Following the same derivation procedure as before:
+Alberto Ortiz
+
+
+23
+Membership-based clustering
+• Other FC algorithms: hyperellipsoids clustering
+– Adaptive Fuzzy C-Shells clustering (AFCS), where a hyperellipsoid is represented by its 
+center 𝑐𝑗 and its shape, defined by a symmetric, positive definite matrix 𝐴𝑗, i.e. 𝜃𝑗 = (𝑐𝑗, 𝐴𝑗)
+– 𝑑𝑛𝑟 is the normalized radial distance 
+(distance to the center of the hyperellipsoid)
+– very similar to hyperplanes clustering: 𝐴𝑗 = 𝑗
+−1
+– another alternative: Fuzzy C Ellipsoidal shells (FCES)
+Alberto Ortiz (last update 19/01/2026)
+initial guess
+final estimate
+
+24
+Membership-based clustering
+• Last remarks about membership-based clustering:
+– K-means is considered as hard clustering (HC) against FCM which is considered as soft 
+clustering (SC) as a result of the relaxation of the membership-related constraints
+• Actually, K-means can be regarded as a particular case of FCM
+– HC algorithms are not as robust as their SC counterparts when other than point 
+representatives are used, e.g. the hard-clustering version of the GK algorithm for 
+hyperplanes clustering needs an adequate number of samples from all underlying 
+clusters to avoid degenerate cases where Σ𝑗 is not invertible
+• If the descriptor of a sample 𝑥𝑖 changes slightly, an HC algorithm might lead to 
+reassigning 𝑥𝑖 from one cluster to another, 
+while, for the case of a SC algorithm, the membership values 𝑢𝑖∗ might be modified 
+but drastic changes will be more difficult to occur
+– In general terms, the fuzzy concepts embedded in SC algorithms make them more 
+flexible than HC algorithms, i.e. able to deal better with noise and data uncertainty
+• By means of FCM, we obtain soft assignments from samples to clusters, what in turn 
+reflects assignments uncertainty (because of the data uncertainty itself) 
+over the most appropriate assignment
+Alberto Ortiz (last update 19/01/2026)
+
+Alberto Ortiz (last update 19/01/2026) 25
+Contents
+• Introduction
+• Membership-based clustering
+• Possibilistic clustering
+• Supplementary material: Mixture models
+
+26
+Possibilistic clustering
+• The formulation for the possibilistic clustering (PC) problem is similar to FC:
+where:
+–   is a DM for possibilistic clustering algorithms
+– 𝑢𝑖𝑗 now represents the grade of compatibility of sample 𝑥𝑖 with cluster 𝐶𝑗 or 
+the possibility that sample 𝑥𝑖 belongs to cluster 𝐶𝑗
+• 𝑢𝑖𝑗 is no longer coupled to 𝑢𝑖𝑘, 𝑘 ≠ 𝑗, because the constraints have changed
+• the possibility that 𝑥𝑖 belongs to 𝐶𝑗 depends on exclusively 𝑥𝑖 and 𝜃𝑗
+• it is thus independent of the possibilities that 𝑥𝑖 belongs to any other cluster
+– q does not play the same role as in FC, we will clarify this later
+– PC behaves better than FC for noisy datasets and 
+depends less on a good election of M
+Alberto Ortiz (last update 19/01/2026)
+1
+ 
+N
+1                                M
+i                                       > 0
+j
+ 
+0 <   N
+max
+
+uij
+𝑠. 𝑡. ෍
+𝑗=1
+𝑀
+𝑢𝑖𝑗 ≤ 1 →
+makes 𝑢𝑖𝑗 depend 
+on each other
+
+27
+Possibilistic clustering
+• The direct optimization of the previous cost function leads to the trivial zero-solution
+• In order to avoid that situation, we have to incorporate an additional term into J:
+– The additional term depends on 𝑢𝑖𝑗 to avoid the zero-solution and also to reduce the 
+effect of outliers
+– 𝑗 are suitably chosen positive constants, which will be discussed later
+• To find the optimum 𝑈 = {𝑢𝑖𝑗} we calculate the partial derivative with respect to 𝑢𝑖𝑗
+and equal it to 0:
+– 𝑢𝑖𝑗 is inversely dependent on(𝑥𝑖, 𝜃𝑗), what in effect reduces the influence of outliers
+• Since the second term of 𝐽 does not involve the cluster representatives 𝜃𝑗, one may 
+conclude that the updating of 𝜃𝑗 is carried out the same way as for FC.
+Alberto Ortiz (last update 19/01/2026)
+
+
+28
+Possibilistic clustering
+• Generalized Clustering Possibilistic Algorithmic Scheme (GCPAS):
+– the algorithm can also be started from 𝑈(0) instead of 𝜃(0)
+– there are no longer issues with (𝑥𝑖, 𝑞𝑗(𝑡)) = 0
+– all FC algorithms can be transformed into their PC counterparts: PCM, PGK, APCS, 
+PCES
+Alberto Ortiz (last update 19/01/2026)
+
+
+29
+Possibilistic clustering
+• Possibilistic c-Means clustering algorithm (PCM):
+Alberto Ortiz (last update 19/01/2026)
+
+
+30
+Possibilistic clustering
+• Role of q:
+– q determines the kind of “compatibility” 
+function implemented by the algorithm
+– 𝑞 = 1 ⇒ 𝑢𝑖𝑗 = 0, 𝑥𝑖 | (𝑥𝑖 , 𝜃𝑗) > 𝑗
+– 𝑞 → +∞ ⇒ 𝑢𝑖𝑗 tends to constant 0.5, 𝑥𝑖
+• Role of 𝒋:
+– 𝒋 determines the dissimilarity level between 𝑥𝑖 and 𝐶𝑗 at which 𝑢𝑖𝑗 = 0.5
+ defines the “size” and “shape” of the cluster
+ defines the influence of a specific point 𝑥𝑖 on the estimation of the 𝐶𝑗 representative
+– one way to estimate the value of 𝒋 is to run FCM and after its convergence
+Alberto Ortiz (last update 19/01/2026)
+
+
+31
+Possibilistic clustering
+• PCM as mode-seeking algorithm:
+ minimization of 𝐽 requires maximizing 𝑢𝑖𝑗, which, in turn, requires minimization of (𝑥𝑖, 𝑞𝑗)
+ if we run PCM for 𝑀 clusters but 𝑋 comprises 𝐾 < 𝑀 natural clusters, some of the 𝑀
+clusters will coincide with others, and hence the number of clusters in 𝑋 need not be known 
+a priori 
+ 𝐶𝑗 are finally placed in regions dense in samples, i.e. the modes of the dataset
+Alberto Ortiz (last update 19/01/2026)
+
+
+32
+Possibilistic clustering
+• Alternative GCPAS:
+– An alternative possibilistic scheme can be derived from a new cost function:
+•  𝑞 is no longer involved
+– It can be shown that, for this case:
+•  𝑢𝑖𝑗 decreases more rapidly than in the standard scheme
+Alberto Ortiz (last update 19/01/2026)
+
+
+33
+Possibilistic clustering
+• Example (standard PCM): N = 140 samples, M = 2 clusters, q = 2, j set by FCM
+Alberto Ortiz (last update 19/01/2026)
+
+
+Alberto Ortiz (last update 19/01/2026) 34
+Contents
+• Introduction
+• Membership-based clustering
+• Possibilistic clustering
+• Supplementary material: Mixture models
+
+35
+Mixture models
+• These algorithms assume that there are M clusters underlying the dataset, each 
+coming from a population obeying a certain probability distribution, so that the goal is 
+to discover the parameters of the mixture. They are also termed as soft clustering.
+• We intend to discover the parameters of the three Gaussians (i, i) and the 
+assignments of samples to clusters.
+Alberto Ortiz (last update 19/01/2026)
+Example: We have a dataset 
+such as:
+… and, in effect, there are 3 clusters, everyone
+coming from a different Gaussian:
+We guess there are M = 3
+clusters normally distributed …
+
+36
+Mixture models
+• We adopt an optimization-based approach which assigns each sample xi to the cluster with 
+highest likelihood: 
+and we model the probability of each sample introducing weights j:
+since, a priori, we do not know which sample belongs to which cluster,
+where:
+so that:
+• Therefore, the output of the optimization process is the parameters j
+of the clusters and the weights rij
+– e.g. for the previous example, we can plot samples xi using a 
+colour code proportional to the corresponding rij →
+Alberto Ortiz (last update 19/01/2026)
+
+
+37
+Mixture models
+• Adopting a log-likelihood approach and assuming i.i.d samples, J is defined as:
+• The maximum likelihood 
+optimization problem hence 
+becomes:
+– The elements of the N  M matrix Z = {zij} are known as latent variables in this problem.
+– rij is named as the responsibility that cluster Cj takes for explaining xi.
+– j are the mixing coefficients, which somehow can be seen as the amount of 
+explanation of the data performed by cluster Cj.
+Alberto Ortiz (last update 19/01/2026)
+
+
+38
+Mixture models
+• The mixture problem can be solved by means of the Expectation-Maximization
+(EM) algorithm.
+– EM is an iterative algorithm that comprises two steps:
+• The E step, where the latent variables zij are re-estimated (keeping constant the 
+parameters of the clusters)
+• The M step, where the distribution parameters are re-estimated (keeping constant 
+the latent variables zij)
+– EM is useful to solve other problems apart from clustering on the basis of a mixture model
+• The most widely used mixture model is the mixture of Gaussians (MOG), also 
+called a Gaussian mixture model (GMM):
+• Because of the shape of a Gaussian pdf, this algorithm is useful for detecting 
+compact and hyperellipsoidal clusters
+Alberto Ortiz (last update 19/01/2026)
+
+
+39
+Mixture models
+• Another example of Mixture of Gaussians:
+Alberto Ortiz (last update 19/01/2026)
+
+
+40
+Mixture models
+• Algorithm EM for Gaussian mixtures:
+Alberto Ortiz (last update 19/01/2026)
+E-step: estimate rij
+keeping j and j at 
+their previous 
+values
+M-step: estimate j
+and j keeping 
+rij at their previous 
+values
+
+
+41
+Mixture models
+• Example: rescaled Old Faithful data set, M = 2
+Alberto Ortiz (last update 19/01/2026)
+t = 1
+t = 2 t = 5 t = 20
+before E(1) after E(1) after M(1)
+
+42
+Mixture models
+• Final remarks:
+– Remember that, once the mixture model has been fitted, we can make use of
+for “hard” sample allocation to clusters
+– The E-step can be computationally demanding because of the calculations of j
+-1.
+• One way to relax this is to assume that all covariance matrices are diagonal or that 
+they are all equal to each other (only one inversion is required at each iteration step).
+– The EM-GMM algorithm reduces to K-means when j = ^2I and j = 1/M.
+Alberto Ortiz (last update 19/01/2026)
+
+
+Unsupervised Learning:
+Optimization-based clustering
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

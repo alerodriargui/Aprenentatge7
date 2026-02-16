@@ -1,0 +1,266 @@
+Unsupervised Learning:
+Introduction
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+Alberto Ortiz (last update 12/15/2025) 2
+Contents
+• Problem description
+• Definition of clustering
+• Proximity measures
+
+3
+Problem description
+• In unsupervised learning (UL), a program does not learn 
+from labelled data. Instead, it attempts to discover 
+patterns in the data, i.e. learn the structure of the data
+– bring out patterns and structure within the data, 
+maybe informative by itself 
+or serve as a guide to further analysis, e.g. learn
+the classes prior to supervised classification
+– known as exploratory analysis or 
+knowledge discovery
+• Using UL  terminology: discover groups of related 
+observations within the data called clusters
+– clustering or cluster analysis
+• assigns observations into groups such that samples 
+in the same group are most similar to one another
+– e.g. discover segments of customers (marketing)
+• More widely applicable than supervised learning: no need for labelled data
+• Other names: Numerical taxonomy (biology), Typology (social sci.), Partitioning (graphs th.)
+Alberto Ortiz (last update 15/12/2025)
+feature space
+output 1
+output 2
+
+4
+Problem description
+• Meaningful clusters can be of diverse
+shapes:
+– This is problem dependent, 
+i.e. problem semantics
+– Humans are very good at detecting clusters 
+in two and three dimensions
+• SL and UL can be thought as occupying 
+opposite ends of a spectrum
+• A different approach called semi-supervised learning (SSL) 
+makes use of both supervised and unsupervised learning
+– The dataset is partially labelled
+– Located somewhere in-between SL and UL
+Alberto Ortiz (last update 15/12/2025)
+
+
+5
+Contents
+• Problem description
+• Definition of clustering
+• Proximity measures
+Alberto Ortiz (last update 15/12/2025)
+
+6
+Definition of clustering
+• A cluster consists of a number of similar objects, given a certain similarity criterion. 
+• Other definitions (collected from here and there):
+– A cluster is a set of entities which are alike, while entities from different clusters are not 
+alike
+– A cluster is an aggregation of points in the test space such that the distance between 
+points in the same cluster is less than the distance between any point in the cluster and 
+any point not in it
+– Clusters may be described as connected regions of a multi-dimensional space 
+containing a relatively high density of points, separated from other such regions by a 
+region containing a relatively low density of points
+• A number of definitions based on rather vaguely defined terms which lead to a bunch 
+of algorithms.
+• In any case, the goal is to find 
+the natural structure of the data, 
+similarly to the human skill of 
+grouping points in 2D/3D space,
+but for any amount of dimensions.
+Alberto Ortiz (last update 15/12/2025)
+
+
+7
+Definition of clustering
+• Given a set of samples 𝑋 = {𝑥1, 𝑥2, … , 𝑥𝑁} defined in an L-dimensional space,
+a first non-universal, but formal definition of clustering would be as follows:
+an M-grouping of X is a partition of X into M sets 𝐶1, 𝐶2, … , 𝐶𝑀, so that
+• Summing up, a clustering problem involves:
+– A set of unlabelled samples
+– A proximity measure  (either a similarity s or a dissimilarity d)
+– A clustering algorithm, from the many alternatives readily available:
+Alberto Ortiz (last update 15/12/2025)
+1. hierarchical
+2. optimization-based
+3. model-based
+4. density-based
+5. graph-based
+6. competitive
+7. valley-seeking
+8. sequential
+9. others …
+
+
+8
+Contents
+• Problem description
+• Definition of clustering
+• Proximity measures
+Alberto Ortiz (last update 15/12/2025)
+
+9
+Proximity measures
+• The proximity measure chosen plays a central role in cluster analysis
+• Formal definition of similarity measure (SM) / dissimilarity measure (DM)
+• A dissimilarity measure d among elements of a set X is a function such that:
+and
+• A similarity measure s among elements of a set X is a function such that:
+andproximity 
+measure 
+over X
+Alberto Ortiz (last update 15/12/2025)
+e.g. d0 = 0
+e.g. s0 = 1
+(the more dissimilar, 
+the greater)
+(the more similar, 
+the greater)
+𝑎 = (𝑎1, 𝑎2)
+𝑏1, 𝑏2 = 𝑏
+
+10
+Proximity measures
+• The concept can be extended to measure proximity between sets (clusters)
+• Formal definition of similarity measure (SM) / dissimilarity measure (DM)
+• A dissimilarity measure d among subsets U  X (U  P(X)) is a function such that:
+and
+• A similarity measure s among subsets U  X (U  P(X)) is a function such that:
+and
+proximity 
+measure 
+over P(X)
+Alberto Ortiz (last update 15/12/2025)
+(the more disimilar, 
+the greater)
+(the more similar, 
+the greater)
+
+
+11
+Proximity measures
+• A more restrictive concept is that of metric
+– A metric m among elements of a set X is a function such that
+and
+– Captures the notion of dissimilarity
+– Not all dissimilarity measures are metrics
+• An DM can be obtained from a SM using any monotonically decreasing function, e.g.
+Alberto Ortiz (last update 15/12/2025)
+
+
+12
+Proximity measures
+• Examples of proximity measures:
+– weighted Lp metric (or Minkowski measure) - DM
+Alberto Ortiz (last update 15/12/2025)
+
+
+13
+Proximity measures
+• Examples of proximity measures:
+– dot product – SM
+– cosinus measure – SM
+– Tanimoto measure – SM
+Alberto Ortiz (last update 15/12/2025)
+consider descriptors as nD-vectors instead of nD-points
+
+a
+b
+
+
+14
+Proximity measures
+• The previous proximity measures are intended for quantitative, real-valued 
+descriptors
+• Other proximity measures for these kind of data are the following:
+– Canberra distance – DM
+– Bray-Curtis distance (Sorensen distance) – DM
+– correlation coefficient – SM
+Alberto Ortiz (last update 15/12/2025)
+
+
+15
+Proximity measures
+• For other sorts of data we need other proximity functions
+• Proximity functions for binary-valued descriptors, i.e. ai = yes/no, e.g.
+– Hamming/matching distances – DM
+– Jaccard’s coefficient – SM (frequency of occurrence of 0s and 1s is not the same)
+– Jaccard’s distance – DM (frequency of occurrence of 0s and 1s is not the same)
+Alberto Ortiz (last update 15/12/2025)
+
+
+16
+Proximity measures
+• Proximity functions for nominal/categorical variables, e.g. ai = red | green | blue
+– Encode categorical values as binary values and make use of corresp. proximity functions
+– Example: a = (gender, colour) = (male | female, red | white | blue)
+1.
+2.
+Alberto Ortiz (last update 15/12/2025)
+be careful 
+with coding !!
+d(red,white) =
+d(red,blue) <
+d(white,blue)
+
+
+17
+Proximity measures
+• Proximity functions for ordinal variables (i.e. there exists an order), 
+e.g. ai = excellent | good | average | poor
+– Encode ordinal values as real values and make use of corresp. proximity functions
+– Example:
+Alberto Ortiz (last update 15/12/2025)
+
+
+18
+Proximity measures
+• Examples of proximity measures between points and clusters
+... at a formal level, they are relevant, 
+but, at a practical level, proximity measures 
+are more useful when defined between clusters
+ = DM or SM
+cluster has no representative cluster has a representative 
+Alberto Ortiz (last update 15/12/2025)
+e.g. is a DM  rep
+C
+a
+ min
+ maxa
+
+19
+Proximity measures
+• Examples of proximity measures between clusters
+– Be careful if your algorithm depends on • being a metric: some of the previous 
+functions may not be metric functions, e.g. max when  is a DM, min when 
+is an SM, or avg either if  is a DM or an SM
+each cluster has a
+representative 
+clusters have no 
+representatives
+Alberto Ortiz (last update 15/12/2025)
+ min
+ max
+e.g. is a DM
+ mean
+1
+2
+
+Unsupervised Learning:
+Introduction
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

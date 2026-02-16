@@ -1,0 +1,1568 @@
+Lecture 2:
+Data analysis
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+
+Alberto Ortiz (last update 13/10/2025)
+Contents
+• Introduction
+• Data exploration (and first cleaning)
+• Data preprocessing (incl. cleaning)
+• Goodness measures
+• Feature selection
+• Dimensionality reduction
+• Pipelines
+
+Alberto Ortiz (last update 13/10/2025)
+Introduction
+• Data cleaning but mostly feature engineering: select the minimum set of features 
+that retain as much as possible the ability to discriminate among samples
+− General criterion
+• select those features that result in a large between-class distance and a reduced variance 
+between class elements (within-class variance)
+− Actions to do to “engineer” the dataset:
+• understand your data, i.e. explore your data (maybe to know which is your case above)
+• pre-process/transform your data, to make things simpler for the next steps
+• examine features in isolation
+• examine features in combination
+• combine your features
+→ feature selection / dimensionality reduction
+wrong selection not bad selection good selection
+
+Alberto Ortiz (last update 13/10/2025)
+Contents
+• Introduction
+• Data exploration (and first cleaning)
+• Data preprocessing (incl. cleaning)
+• Goodness measures
+• Feature selection
+• Dimensionality reduction
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• Data exploration is the first, basic step to understand your data
+• This includes data visualization for qualitative assessment, detection of anomalies, 
+trends and relationships, as well as to detect the necessity for data cleaning
+• Let us consider the Iris flower dataset (Fisher's Iris data set) 
+– multivariate dataset by the British statistician and biologist Ronald Fisher (1936)
+– 150 samples under four attributes: 
+• sepal length 
+• sepal width 
+• petal length 
+• petal width 
+– 3 species: 
+• setosa
+• versicolor 
+• virginica
+
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• Basic descriptive data:
+import numpy as np
+from sklearn.datasets import load_iris
+iris = load_iris()
+X = iris.data
+y = iris.target
+nos, nod = X.shape
+print('no. samples = %d, no. dimensions = %d' % (nos, nod)) 
+noc = len(np.unique(y))
+print('no. classes = %d' % (noc))
+mu = np.mean(X, axis=0)
+std = np.std(X, axis=0)
+std2 = np.var(X, axis=0)
+print('    mean std  var')
+for i in range(nod):
+print('x%d: %.2f %.2f %.2f' % (i+1,mu[i],std[i],std2[i]))
+no. samples = 150, no. dimensions = 4
+no. classes = 3
+mean std var
+x1: 5.84 0.83 0.68
+x2: 3.06 0.43 0.19
+x3: 3.76 1.76 3.10
+x4: 1.20 0.76 0.58
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• Basic descriptive data:
+import numpy as np
+from sklearn.datasets import load_iris
+iris = load_iris()
+print(iris.DESCR)
+Iris plants dataset
+--------------------
+**Data Set Characteristics:**
+:Number of Instances: 150 (50 in each of three classes)
+:Number of Attributes: 4 numeric, predictive attributes and the class
+:Attribute Information:
+- sepal length in cm
+- sepal width in cm
+- petal length in cm
+- petal width in cm
+- class:
+- Iris-Setosa
+- Iris-Versicolour
+- Iris-Virginica
+:Summary Statistics:
+============== ==== ==== ======= ===== ====================
+Min  Max   Mean    SD   Class Correlation
+============== ==== ==== ======= ===== ====================
+sepal length:   4.3  7.9   5.84   0.83    0.7826
+sepal width:    2.0  4.4   3.05   0.43   -0.4194
+petal length:   1.0  6.9   3.76   1.76    0.9490  (high!)
+petal width:    0.1  2.5   1.20   0.76    0.9565  (high!)
+============== ==== ==== ======= ===== ====================
+:Missing Attribute Values: None
+:Class Distribution: 33.3% for each of 3 classes.
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• Basic visualization:
+• For multidimensional datasets, i.e. more than 2 / 3 dimensions, the standard methods 
+of visualization are not an option
+– Among many others: 
+• the Scatter Plot Matrix (SPLOM) and 
+• the parallel coordinates plot 
+are alternative visualization tools, though of limited capability
+import matplotlib.pyplot as plt
+plt.figure()
+for c in range(noc):
+i = np.where(y == c)[0]
+plt.scatter(X[i,0],X[i,1])
+plt.xlabel('x1 (sepal length)')
+plt.ylabel('x2 (sepal width)')
+plt.title('iris dataset')
+plt.show()
+
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• Scatter PLOt Matrix
+– Correlation plots & 
+Histograms
+import seaborn as sb
+df = sb.load_dataset('iris')
+sb.pairplot(df, hue='species')
+number of features
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• Parallel coordinates plot
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sb
+df = sb.load_dataset('iris')
+pd.plotting.parallel_coordinates(df, 'species', color=('#0000FF', '#FFA500', '#00FF00'))
+plt.legend(loc='lower left')
+plt.show()
+number of features
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• Pandas is a library for data manipulation and analysis which can be useful for ML
+– The pandas dataframe class may be particularly useful for data manipulation and 
+indexing, as well as for file input / output
+• To create a dataframe we need an array of values. 
+Moreover, we can add labels for the columns and for the samples:
+• In dataframes, indexing can be very flexible with the df.loc() method:
+import pandas as pd
+df = pd.DataFrame([[1, 2], [4, 5], [7, 8]],
+index=['cobra', 'viper', 'sidewinder'],
+columns=['max_speed', 'shield'])
+print(df.head())
+max_speed shield
+cobra               1       2
+viper               4       5
+sidewinder          7       8
+print(df.loc[['viper', 'sidewinder']])
+print(df.loc['cobra':'viper', 'max_speed'])
+print(df.loc[df['shield'] > 4, ['max_speed']])
+max_speed shield
+viper               4       5
+sidewinder          7       8
+cobra    1
+viper    4
+Name: max_speed, dtype: int64
+max_speed
+viper               4
+sidewinder          7
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• Let us use the Titanic dataset to illustrate other functionalities of dataframes:
+– df.tail(n) displays the last n samples
+• We can also load the dataset from disk. 
+Let us assume the dataset is 
+in file titanic.csv:
+– Other formats also available for input/output, e.g. JSON, excel, etc.
+import seaborn as sb
+titanic = sb.load_dataset('titanic')
+df = titanic
+print(df.info())
+print(df.head(3))
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 891 entries, 0 to 890
+Data columns (total 15 columns):
+#   Column       Non-Null Count  Dtype
+--- ------ -------------- -----
+0   survived     891 non-null    int64   
+1   pclass 891 non-null    int64   
+2   sex          891 non-null    object  
+3   age          714 non-null    float64 
+4   sibsp 891 non-null    int64   
+5   parch        891 non-null    int64   
+6   fare         891 non-null    float64 
+7   embarked     889 non-null    object  
+8   class        891 non-null    category
+9   who          891 non-null    object  
+10  adult_male 891 non-null    bool    
+11  deck         203 non-null    category
+12  embark_town 889 non-null    object  
+13  alive        891 non-null    object  
+14  alone        891 non-null    bool    
+dtypes: bool(2), category(2), float64(2), 
+int64(4), object(5)
+memory usage: 80.7+ KB
+survived pclass sex  age ... deck embark_town alive alone
+0       0      3   male 22.0 ...  NaN Southampton    no False
+1       1      1 female 38.0 ...    C   Cherbourg   yes False
+2       1      3 female 26.0 ...  NaN Southampton   yes  True
+df = pd.read_csv('titanic.csv')
+print(df.info())
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• The df.describe() method provides a summary of the dataset statistics:
+• For selecting elements of the dataset, one can additionally use column labels and the 
+df.iloc() method:
+survived      pclass age       sibsp parch        fare
+count  891.000000  891.000000  714.000000  891.000000  891.000000  891.000000
+mean     0.383838    2.308642   29.699118    0.523008    0.381594   32.204208
+std      0.486592    0.836071   14.526497    1.102743    0.806057   49.693429
+min      0.000000    1.000000    0.420000    0.000000    0.000000    0.000000
+25%      0.000000    2.000000   20.125000    0.000000    0.000000    7.910400
+50%      0.000000    3.000000   28.000000    0.000000    0.000000   14.454200
+75%      1.000000    3.000000   38.000000    1.000000    0.000000   31.000000
+max      1.000000    3.000000   80.000000    8.000000    6.000000  512.329200
+print(df.describe())
+X1 = df.iloc[:,[1,2,3,4,5,6]].to_numpy()
+X2 = 
+df[['pclass','sex','age','sibsp','parch','fare']]
+y  = df['survived']
+print(X1[0:3,:])
+print(X2.head(3))
+[[3 'male'   22.0 1 0 7.25]
+[1 'female' 38.0 1 0 71.2833]
+[3 'female' 26.0 0 0 7.925]]
+pclass sex  age sibsp parch    fare
+0      3   male 22.0     1     0  7.2500
+1      1 female 38.0     1     0 71.2833
+2      3 female 26.0     0     0  7.9250
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• Conditions can also be used for selecting samples:
+• The dataframe object provides a number of ways to get more details of the dataset:
+– The df.columns attribute is a list with the labels of the dataset columns
+– df.values() or df.to_numpy() provide the dataset values as a numpy array
+– df.count_values() returns the number of times the different values occur in a column
+– With df.nunique() we can see the counts of unique values in each column
+survived pclass sex  age ... deck embark_town alive alone
+1       1      1 female 38.0 ...    C   Cherbourg   yes False
+3       1      1 female 35.0 ...    C Southampton   yes False
+11      1      1 female 58.0 ...    C Southampton   yes  True
+print(df[['age','deck']].nunique())
+print(df['sex'].value_counts())
+age      88
+deck      7
+male      577
+female    314
+Name: sex, dtype: int64
+print(df[df['deck'] == 'C'].head(3))
+survived pclass sex  age ... deck embark_town alive alone
+6       0      1   male 54.0 ...    E Southampton    no  True
+11      1      1 female 58.0 ...    C Southampton   yes  True
+54      0      1   male 65.0 ...    B   Cherbourg    no False
+print(df[(df['age'] > 50) & (df['pclass'] < 2)].head(3))
+
+Alberto Ortiz (last update 13/10/2025)
+Data exploration (and first cleaning)
+• We can remove some features
+(columns) which are useless:
+• We can as well drop duplicates, if any:
+udf = df
+udf.drop('embarked',axis=1,inplace=True)
+udf.drop('class',axis=1,inplace=True)
+udf.drop('who',axis=1,inplace=True)
+udf.drop('adult_male',axis=1,inplace=True)
+udf.drop('deck',axis=1,inplace=True)
+udf.drop('embark_town',axis=1,inplace=True)
+udf.drop('alive',axis=1,inplace=True)
+udf.drop('alone',axis=1,inplace=True)
+print(udf.info())
+RangeIndex: 891 entries, 0 to 890
+Data columns (total 7 columns):
+#   Column    Non-Null Count  Dtype
+--- ------ -------------- -----
+0   survived  891 non-null    int64  
+1   pclass 891 non-null    int64  
+2   sex       891 non-null    object 
+3   age       714 non-null    float64
+4   sibsp 891 non-null    int64  
+5   parch     891 non-null    int64  
+6   fare      891 non-null    float64
+import pandas as pd
+df = pd.DataFrame({
+'brand': ['Yum','Yum','Indo','Indo','Indo'],
+'style': ['cup','cup','cup','pack','pack'],
+'rating': [4, 4, 3.5, 15, 5]
+})
+print(df)
+print(df.drop_duplicates())
+print(df.drop_duplicates(subset='brand'))
+brand style  rating
+0   Yum   cup     4.0
+1   Yum   cup     4.0
+2  Indo   cup     3.5
+3  Indo  pack    15.0
+4  Indo  pack     5.0
+brand style  rating
+0   Yum   cup     4.0
+2  Indo   cup     3.5
+3  Indo  pack    15.0
+4  Indo  pack     5.0
+brand style  rating
+0   Yum   cup     4.0
+2  Indo   cup     3.5
+
+Alberto Ortiz (last update 13/10/2025)
+Contents
+• Introduction
+• Data exploration (and first cleaning)
+• Data preprocessing (incl. cleaning)
+• Goodness measures
+• Feature selection
+• Dimensionality reduction
+• Pipelines
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing (incl. cleaning)
+• Preparation of data samples before proceeding to their use
+– Handling categorical data
+– Outlier detection (and removal)
+– Data normalization / standardization
+– Filling in missing data
+
+Alberto Ortiz (last update 13/10/2025)
+• Handling categorical data
+– Categorical data must be converted to numeric values before learning
+• The LabelEncoder() object assigns a progressive integer label to every class label
+• The names of the classes are in attribute le.classes_
+– Unfortunately, on some occasions, this is not a good 
+encoding for training, and one-hot encoding must be used instead:
+Data preprocessing: Categorical data
+import seaborn as sb
+from sklearn.preprocessing import LabelEncoder
+titanic = sb.load_dataset('titanic')
+df = titanic
+print(df['sex'][:5])
+le = LabelEncoder()
+df['sex'] = le.fit_transform(df['sex'])
+print(df['sex'][:5])
+print(le.classes_)
+0      male
+1    female
+2    female
+3    female
+4 male
+Name: Sex, dtype: object
+0    1
+1    0
+2    0
+3    0
+4    1
+Name: Sex, dtype: int32
+['female' 'male']
+from sklearn.preprocessing import OneHotEncoder
+df = titanic
+ohe = OneHotEncoder()
+data = np.expand_dims(df['sex'], axis=-1)
+ohe.fit(data)
+data_ = ohe.transform(data).toarray()
+print(data_[:5])
+[[0. 1.]
+[1. 0.]
+[1. 0.]
+[1. 0.]
+[0. 1.]]
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing: Outlier detection
+• Outlier detection (and removal)
+– outlier  sample that does not agree with the rest of the population
+• normally, distance to the mean is 𝑘, 𝑘
+• an outlier can distort training
+– the resulting classifier / regressor may not 
+classify / predict for new samples in the right way
+x xx xx xx
+e.g. sonar readings (case 1D)
+e.g. case 2D
+right
+wrong
+(biased parameters)
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing: Outlier detection
+• Sources of outliers:
+– measurement error (instrument error or noise) or experimental error (wrong data extraction)
+– data entry error (data collection/typing) or data processing error
+• If you need to counteract the outliers, these are some of the possible actions:
+– discard the outliers (= full sample) if the dataset permits to do so, i.e. it is big enough
+– alter the data:
+• trimming: extreme values are set to “missing”, i.e. NaN (Python)
+• winsorization: replace values at the higher and lower ends 
+of the distribution with specific lower and upper values
+– tolerate the outliers by reducing their influence
+• use optimization methods from robust statistics (large values are attenuated “on-line”)
+Winsorized mean. After sorting the data, 
+we replace 𝑥1 and 𝑥10 by resp. 𝑥2 and 𝑥9
+(20% winsorized mean)
+1, 5, 7, 8, 9, 10, 10, 12, 12, 34 →  = 10.8
+5, 5, 7, 8, 9, 10, 10, 12, 12, 12 →  = 9.0
+scipy.stats.mstats.winsorize()
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing: Outlier detection
+• z-score method (Gausssian data): 𝜇 ± 3𝜎 accumulates 99.7% 
+of the probability
+import numpy as np
+from sklearn.datasets import load_wine
+wine = load_wine()
+X = wine.data
+y = wine.target
+print(wine.DESCR)
+outl = np.zeros((3,13))
+for c in range(3):
+for f in range(13):
+cc = X[y == c, f]
+mu, sg = np.mean(cc), np.std(cc)
+cut_off = sg * 3
+lower, upper = mu - cut_off, mu + cut_off
+# identify outliers
+outliers = [x for x in cc if x < lower or x > upper]
+nout = len(outliers)
+# non-outliers
+non_outliers = [x for x in cc if x >= lower and x <= upper]
+nok = len(non_outliers)
+outl[c,f] = nout
+print(outl)
+============================= ==== ===== ======= =====
+Min   Max   Mean     SD
+============================= ==== ===== ======= =====
+Alcohol:                      11.0  14.8    13.0   0.8
+Malic Acid:                   0.74  5.80    2.34  1.12
+Ash:                          1.36  3.23    2.36  0.27
+Alcalinity of Ash:            10.6  30.0    19.5   3.3
+Magnesium:                    70.0 162.0    99.7  14.3
+Total Phenols:                0.98  3.88    2.29  0.63
+Flavanoids:                   0.34  5.08    2.03  1.00
+Nonflavanoid Phenols:         0.13  0.66    0.36  0.12
+Proanthocyanins:              0.41  3.58    1.59  0.57
+Colour Intensity:              1.3  13.0     5.1   2.3
+Hue:                          0.48  1.71    0.96  0.23
+OD280/OD315 of diluted wines: 1.27  4.00    2.61  0.71
+Proline:                       278  1680     746   315
+============================= ==== ===== ======= =====
+:Missing Attribute Values: None
+:Class Distribution: class_0 (59), class_1 (71), class_2 (48)
+class f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13
+1 0 0 1 1 0 2 0 1 0 0 0 0 0
+2 0 1 1 0 2 0 1 0 1 1 1 0 0
+3 0 0 0 0 0 1 0 0 1 0 0 0 0
+With this code, we know that 
+there are outliers in all classes, 
+but we should discover which 
+samples are affected !! 
+and next do trimming or winsorizing
+from scipy import stats
+z = np.abs(stats.zscore(X))
+# discard samples with z > 3
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing: Outlier detection
+• Inter-quartile range method (non-Gausssian data)
+import numpy as np
+from sklearn.datasets import load_wine
+wine = load_wine()
+X = wine.data
+y = wine.target
+from numpy import percentile
+outl = np.zeros((3,13))
+for c in range(3):
+for f in range(13):
+cc = X[y == c, f]
+q25, q75 = percentile(cc, 25), percentile(cc, 75)
+iqr = q75 - q25
+cut_off = iqr * 1.5
+lower, upper = q25 - cut_off, q75 + cut_off
+# identify outliers
+outliers = [x for x in cc if x < lower or x > upper]
+nout = len(outliers)
+# non-outliers
+non_outliers = [x for x in cc if x >= lower and x <= upper]
+nok = len(non_outliers)
+outl[c,f] = nout
+print(outl)
+class f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13
+1 0 9 1 3 0 2 0 4 4 1 0 0 0
+2 3 7 2 4 5 0 1 0 8 4 1 0 1
+3 0 0 0 0 0 2 1 1 2 0 0 2 0
+and next do trimming or winsorizing
+− IQR = difference between the 
+75th and the 25th percentiles of 
+the data (Q3, Q1)
+− Situates outliers out of 
+the ±k × IQR interval
+With this code, we know that 
+there are outliers in all classes, 
+but we should discover which 
+samples are affected !! 
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing: Outlier detection
+• Box-plots
+import matplotlib.pyplot as plt
+import seaborn as sb # also in matplotlib
+df = sb.load_dataset('iris')
+plt.figure()
+sb.boxplot(y=df['species'], x=df['sepal_length'])
+plt.show()
+plt.figure()
+sb.boxplot(y=df['species'], x=df['sepal_width'])
+plt.show()
+plt.figure()
+sb.boxplot(y=df['species'], x=df['petal_length'])
+plt.show()
+plt.figure()
+sb.boxplot(y=df['species'], x=df['petal_width'])
+plt.show()
+Q1 Q3
+Q2 
+(= median)
+Q1 - 1.5 IQR Q3 + 1.5 IQR
+IQR
+outliers
+ 
+Whiskers can be of different 
+length because they are made 
+to coincide with a sample
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing: Outlier detection
+• Box-plots
+– Why 1.5IQR?
+• Related with the 68–95–99 rule
+from the Gaussian distribution
+• In the Gaussian distribution,
+±1.5IQR covers approx.
+the same probability as ±3
+±3 → 99.73%
+±1.5 IQR → 99.30%
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing: Outlier detection
+• Automatic detection of outliers
+– Local Outlier Factor (LOF): measures the local deviation 
+of the density of a sample with respect to its neighbors
+– Others: IsolationForest, etc.
+import numpy as np
+import pandas as pd
+from sklearn.neighbors import LocalOutlierFactor
+import matplotlib.pyplot as plt
+import seaborn as sb
+df = sb.load_dataset('iris')
+data = df.values
+X = data[:,:-1]
+y = data[:,-1]
+# identify outliers in the training dataset
+lof = LocalOutlierFactor(n_neighbors=20)
+yhat = lof.fit_predict(X)
+# select all rows that are not outliers
+mask = yhat != -1
+X, y = X[mask, :], y[mask]
+y = np.expand_dims(y,axis=1)
+df2 = pd.DataFrame(np.hstack((X,y)))
+df2.columns = df.columns
+
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing (incl. cleaning)
+• Data normalization / standardization
+– Often, different features do not have the same dynamic range (range of values)
+• characteristics with wider ranges will have more influence on the classification 
+regardless of whether they are more relevant to the design of the classifier or not
+– Solution:
+• normalize/scale features so that their dynamic ranges are similar
+– linear scaling
+▪ mu-sigma normalization (standardization)
+▪ max-min normalization
+▪ others
+– non-linear scaling
+▪ softmax normalization
+▪ others
+transformation
+-10 +10
++1
+-1
++1
+-1
++1
+-1
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing: Normalization
+• - (mu-sigma) normalization
+– Given 𝐿 – feature descriptors:
+– After the transformation:
+L
+N
+normalization
+all samples, all classes
+VERY IMPORTANT
+Apply the transformation to the full dataset once.
+❖ Typical mistake. Standardize the training 
+set separately from the test set.
+❖ Keep the transformation parameters ҧ𝑥, 𝜎
+to standardize new samples
+𝑥𝑖𝑘 − ҧ𝑥𝑘 = 0 ⇒  ො𝑥𝑖𝑘 = 0
+𝑥𝑖𝑘 − ҧ𝑥𝑘 = +𝑘𝜎𝑘  ⇒  ො𝑥𝑖𝑘 = +𝑘
+𝑥𝑖𝑘 − ҧ𝑥𝑘 = −𝑘𝜎𝑘  ⇒  ො𝑥𝑖𝑘 = −𝑘
+
+Alberto Ortiz (last update 13/10/2025)
+• - (mu-sigma) normalization
+Data preprocessing: Normalization
+normalization: mu-sigma
+k=1 org:  -8.00 - 8.00 :  16.00
+k=2 org: -25.00 - 25.00 :  50.00
+ratio  :   3.13
+k=1 nor:  -2.18 - 2.21 :   4.38
+k=2 nor:  -2.25 - 2.25 :   4.50
+ratio  :   1.03
+ dynamic range of 𝑥1
+ dynamic range of 𝑥2
+ dynamic range of ො𝑥1
+ dynamic range of ො𝑥2
+
+Alberto Ortiz (last update 13/10/2025)
+Data preprocessing: Normalization
+• Max-min normalization
+– Given 𝐿 – feature descriptors:
+– After the transformation:
+... distributes the data within the range [0,1]
+• the original ends correspond to 0 and 1
+• e.g. if originally the range of values was [-30, 100], 
+after normalization, value -30 will become 0 for that feature, 
+while a value of 100 will become 1
+L
+N
+normalization
+all samples / classes
+VERY IMPORTANT: 
+Apply the transformation to the full 
+dataset once.
+❖ Keep the transformation 
+parameters 𝑥, 𝑋 to 
+normalize new samples
+
+Alberto Ortiz (last update 13/10/2025)
+• Max-min normalization
+normalization: min-max
+k=1 org:  -8.00 - 8.00 :  16.00
+k=2 org: -25.00 - 25.00 :  50.00
+ratio  :   3.13
+k=1 nor:   0.00 - 1.00 :   1.00
+k=2 nor:   0.00 - 1.00 :   1.00
+ratio  :   1.00
+ dynamic range of 𝑥1
+ dynamic range of 𝑥2
+ dynamic range of ො𝑥1
+ dynamic range of ො𝑥2
+Data preprocessing: Normalization
+
+Alberto Ortiz (last update 13/10/2025)
+• Softmax normalization (non-linear transformation)
+– Given 𝐿 – feature descriptors:
+– After the transformation:
+… but it does not distribute evenly the data within [0,1]
+• exponentially "concentrates" values far from the mean 
+as a function of  and 𝑟: 
+– the higher 𝑟, the closer to ½ get the farthest samples
+L
+N
+normalización
+todas las clases
+VERY IMPORTANT: 
+Apply the transformation to the 
+full dataset once.
+❖ Keep the transformation 
+parameters ҧ𝑥, 𝜎, 𝑟 to 
+standardize new samples
+Data preprocessing: Normalization
+
+
+Alberto Ortiz (last update 13/10/2025)
+• Softmax normalization
+normalization: softmax (r=1)
+k=1 org:  -8.00 - 8.00 :  16.00
+k=2 org: -25.00 - 25.00 :  50.00
+ratio  :   3.13
+k=1 nor:   0.10 - 0.90 :   0.80
+k=2 nor:   0.10 - 0.90 :   0.81
+ratio  :   1.01
+ dynamic range of 𝑥1
+ dynamic range of 𝑥2
+ dynamic range of ො𝑥1
+ dynamic range of ො𝑥2
+Data preprocessing: Normalization
+
+Alberto Ortiz (last update 13/10/2025)
+• Comparison
+mu-sigma normalization max-min normalization softmax normalization
+Data preprocessing
+
+Alberto Ortiz (last update 13/10/2025)
+• Support in Python:
+Data preprocessing: Normalization
+from sklearn import preprocessing
+from sklearn.datasets import load_iris
+iris = load_iris()
+X = iris.data
+scaler = preprocessing.StandardScaler()
+scaler.fit(X)
+Xhat = scaler.transform(X)
+print(scaler.mean_)
+print(scaler.scale_)
+print(Xhat.mean(axis=0))
+print(Xhat.std(axis=0))
+from sklearn import preprocessing
+from sklearn.datasets import load_iris
+iris = load_iris()
+X = iris.data
+scaler = preprocessing.MinMaxScaler()
+scaler.fit(X)
+Xhat = scaler.transform(X)
+print(scaler.min_)
+print(scaler.scale_)
+print(Xhat.max(axis=0))
+print(Xhat.min(axis=0))
+[5.8433 3.0573 3.7580 1.1993]
+[0.8253 0.4344 1.7594 0.7597]
+[-1.7e-15 -1.8e-15 -1.7e-15 -1.4e-15]
+[1. 1. 1. 1.]
+[-1.1944 -0.8333 -0.1695 -0.0417]
+[ 0.2778  0.4167  0.1695  0.4167]
+[1. 1. 1. 1.]
+[0. 0. 0. 0.]  1 / (max – min)
+ – min / (max – min)
+ 𝜎 
+ 𝜇 
+
+Alberto Ortiz (last update 13/10/2025)
+• Filling in missing data
+– Sometimes, a dataset is incomplete:
+• If the training set is large enough, one can discard incomplete samples
+• With some datasets, discarding samples is not an option → heuristic prediction
+– e.g. fill missing data using the average value from complete samples
+– e.g. fill missing data according to the inherent distribution
+x1 x2 x3 x4
+1 2 -4 3
+3 2 ? 2
+2 5 3 ?
+2.5 ? 2 3
+1 1 0 2
+6 2 4 1
+Data preprocessing (incl. cleaning)
+− In Python, ? typically appear as Nan, 
+Null or None values
+− Machine learning models cannot 
+handle these kind of values
+− Filling with 0s is not an option
+
+Alberto Ortiz (last update 13/10/2025)
+• We will illustrate the process 
+with the Titanic dataset:
+– We can see that column Age contains 
+missing (null) values
+• Also other columns, sometimes they are
+not useful from the ML point of view
+– This can also be obtained by means of 
+the isnull() and the isna() methods:
+Data preprocessing: Missing data
+RangeIndex: 891 entries, 0 to 890
+Data columns (total 12 columns):
+#   Column       Non-Null Count  Dtype
+--- ------ -------------- -----
+0   survived    891 non-null    int64   
+1   pclass 891 non-null    int64   
+2   sex         891 non-null    object  
+3   age         714 non-null    float64 
+4   sibsp 891 non-null    int64   
+5   parch       891 non-null    int64   
+6   fare        891 non-null    float64 
+7   embarked    889 non-null    object  
+8   class       891 non-null    category
+9   who         891 non-null    object  
+10  adult_male 891 non-null    bool    
+11  deck        203 non-null    category
+import seaborn as sb
+titanic = sb.load_dataset('titanic')
+df = titanic.iloc[:,0:12]
+print(df.info())
+print(df.isnull().sum())
+print(df.isna().sum())
+survived        0
+pclass 0
+sex             0
+age           177
+sibsp 0
+parch           0
+fare            0
+embarked        2
+class           0
+who             0
+adult_male 0
+deck          688
+
+Alberto Ortiz (last update 13/10/2025)
+• We can proceed in several ways:
+– Delete the columns with missing data:
+– Delete the rows with missing data:
+• In this way, we remove too many 
+entries because of the deck column:
+• Better if we remove first the deck column
+and next the rows with missing data:
+Data preprocessing: Missing data
+udf = df.dropna(axis=1)
+print(udf.info())
+udf = df.dropna(axis=0)
+print(udf.info())
+RangeIndex: 891 entries, 0 to 890
+Data columns (total 9 columns):
+#   Column       Non-Null Count  Dtype
+--- ------ -------------- -----
+0   survived    891 non-null    int64   
+1   pclass 891 non-null    int64   
+2   sex         891 non-null    object  
+3   sibsp 891 non-null    int64   
+4   parch       891 non-null    int64   
+5   fare        891 non-null    float64 
+6   class       891 non-null    category
+7   who         891 non-null    object  
+8   adult_male 891 non-null    bool 
+Int64Index: 712 entries, 0 to 890
+Data columns (total 11 columns):
+#   Column       Non-Null Count  Dtype
+--- ------ -------------- -----
+0   survived    712 non-null    int64   
+1   pclass 712 non-null    int64   
+2   sex         712 non-null    object  
+3   age         712 non-null    float64 
+4   sibsp 712 non-null    int64   
+5   parch       712 non-null    int64   
+6   fare        712 non-null    float64 
+7   embarked    712 non-null    object  
+8   class       712 non-null    category
+9   who         712 non-null    object  
+10  adult_male 712 non-null    bool 
+udf = df.drop('deck', axis=1)
+udf.dropna(axis=0,inplace=True)
+print(udf.info())
+-> 183 entries, 1 to 889
+
+Alberto Ortiz (last update 13/10/2025)
+• We can proceed in several ways:
+– Fill the missing values by means of feature imputation:
+Numerical data
+• Fill with the mean
+• Fill with the median
+• Fill with extreme values that do not 
+occur in the data
+Categorical data
+• Fill with the mode of the distribution
+• Fill with a new label
+– It is good practice to register which 
+data values have been filled in
+before the imputation:
+Data preprocessing: Missing data
+RangeIndex: 891 entries, 0 to 890
+Data columns (total 13 columns):
+#   Column       Non-Null Count  Dtype
+--- ------ -------------- -----
+0   survived     891 non-null    int64   
+1   pclass 891 non-null    int64   
+2   sex          891 non-null    object  
+3   age          891 non-null    float64 
+4   sibsp 891 non-null    int64   
+5   parch        891 non-null    int64   
+6   fare         891 non-null    float64 
+7   embarked     889 non-null    object  
+8   class        891 non-null    category
+9   who          891 non-null    object  
+10  adult_male 891 non-null    bool    
+11  deck         203 non-null    category
+12  missing_age 891 non-null    bool 
+udf = df
+udf['age'].fillna(udf['age'].mean(),
+inplace=True)
+udf['missing_age'] = df['age'].isnull()
+print(udf.info())
+
+Alberto Ortiz (last update 13/10/2025)
+• There are alternative ways:
+– Fill the missing values using the SimpleImputer class for univariate imputation
+– Multivariate imputation is available in the IterativeImputer class
+• Takes into account all columns, instead of only the values of the column with missing values
+• Makes use of a multivariate regression model fitted with the available features to regress the 
+missing values
+Data preprocessing: Missing data
+X1 = 
+[[ 1.  2.]
+[nan  3.]
+[ 7.  6.]]
+X1* = 
+[[1. 2.]
+[4. 3.]
+[7. 6.]]
+X2 = 
+[[nan  2.]
+[ 6. nan]
+[ 7.  6.]]
+X2* = 
+[[4. 2.  ]
+[6.   3.67]
+[7.   6.  ]]
+from sklearn.impute import SimpleImputer
+imp = SimpleImputer(missing_values=np.nan, 
+strategy='mean')
+X1 = np.array([[1,      2], 
+[np.nan, 3], 
+[7,      6]])
+imp.fit(X1)
+print('X1 = \n', X1)
+print('X1* = \n', imp.transform(X1))
+X2 = np.array([[np.nan, 2], 
+[6, np.nan], 
+[7, 6]])
+print('X2 = \n', X2)
+print('X2* = \n', imp.transform(X2))
+
+
+Alberto Ortiz (last update 13/10/2025)
+Contents
+• Introduction
+• Data exploration (and first cleaning)
+• Data preprocessing (incl. cleaning)
+• Goodness measures
+• Feature selection
+• Dimensionality reduction
+• Pipelines
+
+Alberto Ortiz (last update 13/10/2025)
+• General criterion:
+− Features should result in a large distance between classes (between-class distance) and 
+a reduced variance between class elements (within-class variance)
+− Options:
+• examine features in isolation
+− not optimal, but it serves to discard 
+bad selections easily
+• examine features in combination
+− We will consider
+• measures based on scatter matrices 
+(examination in combination)
+− but we are not going to consider:
+• measures based on statistical inference tests (isolated examination)
+– Each test allows you to work with one feature and two classes only, and requires 
+assumptions about the probability distribution for the classes
+Goodness measures
+
+Alberto Ortiz (last update 13/10/2025)
+• Measures based on scatter matrices allow multiple classes and several 
+characteristics to be treated simultaneously and do not require the assumption of 
+normality in the data
+• Let us suppose the following dataset:
+– 10 samples/class, 3 classes, 2 features
+Measures based on scatter matrices
+
+
+Alberto Ortiz (last update 13/10/2025)
+• We first calculate the within-class scatter matrix (vectors are always column 
+vectors):
+where:
+– 𝑀 is the number of classes
+– 𝑛𝑘 is the number of samples in class 𝑘
+– 𝑃𝑘 is the probability a priori of class 𝜔𝑘
+– 𝑆𝑘 is the covariance matrix of class 𝜔𝑘
+Measures based on scatter matrices
+
+Alberto Ortiz (last update 13/10/2025)
+• Following with the example: 𝑀 = 3 classes, 𝑛𝑘 = 10 samples/class, 𝑁 = 30 samples
+Measures based on scatter matrices
+
+
+Alberto Ortiz (last update 13/10/2025)
+• We next calculate the between-class scatter matrix (vectors are always column 
+vectors):
+• Following with the example: 
+• Finally, we obtain the mixture scatter matrix:
+• Important properties:
+– trace(Sw) measures the dispersion of features inside the classes
+– trace(Sb) measures the dispersion of the class centers amongst them
+ All this permits comparing different features sets among them,
+i.e. they are not absolute measures, but relative
+Measures based on scatter matrices
+
+
+Alberto Ortiz (last update 13/10/2025)
+• We can define the following measures:
+Measures based on scatter matrices
+
+
+Alberto Ortiz (last update 13/10/2025)
+• 1D case (1 feature) and 2 equiprobable classes: (= feature by feature and every 2 classes)
+– 𝑆𝑤 gets reduced to 𝜎1
+2 + 𝜎2
+2
+– 𝑆𝑏 can be shown to be  
+1
+2 (𝜇1 − 𝜇2)2
+• Following with this reasoning, we obtain the Fisher’s Discriminant Ratio (FDR) for 
+feature 𝑓 and classes 𝜔1 and 𝜔2:
+– FDR can be used to quantify the separability capacity of individual features
+– Similar to q-statistics (measures based on statistical hypothesis testing),
+but the FDR does not depend on the statistical distribution of the data !!
+• Multiclass case, one feature 𝑓:
+Measures based on scatter matrices
+
+
+Alberto Ortiz (last update 13/10/2025)
+• For the previous example:
+Measures based on scatter matrices
+f FDRf * f FDRf 
++
+947,5168 417,1436
+85,8043 41,7067
+7294,3245 3498,2874
+
+Alberto Ortiz (last update 13/10/2025)
+Contents
+• Introduction
+• Data exploration (and first cleaning)
+• Data preprocessing (incl. cleaning)
+• Goodness measures
+• Feature selection
+• Dimensionality reduction
+• Pipelines
+
+Alberto Ortiz (last update 13/10/2025)
+• Given 𝑪 features in total, this point is about selecting 𝑳 as the most adequate subset
+• Several approaches:
+– Isolated feature selection
+• Essentially based on a statistical test, e.g. the F test, that checks each feature 
+separately, assigns a score to each feature 𝑓𝑘 and chooses the 𝐿 best features
+– The F-test captures linear relationships between features 𝑓𝑘 and labels 𝑦
+– A highly correlated feature is given a higher score
+– The SelectKbest function in scikit-learn implements such a test
+– Joint features selection
+• Consider different groups of features and select the one with the highest score 
+according to a certain goodness measure
+Feature selection
+
+Alberto Ortiz (last update 13/10/2025)
+• Joint selection
+Consider subsets of L features
+1) Joint exhaustive selection: go through all combinations and select the best one
+– For example, let us suppose 𝐶 = 4 and 𝐿 = 2:
+– 6 combinations in total in this case
+– General case:
+Feature selection
+f1,f2,f3,f4
+f1,f2,f3 f1,f2,f4 f1,f3,f4 f2,f3,f4
+f1,f2 f1,f3 f2,f3
+f1,f2 f1,f4 f2,f4
+f1,f3 f1,f4 f3,f4
+f2,f3 f2,f4 f3,f4
+
+
+2) Joint suboptimal selection
+− Go through a subset of combinations
+− It does not guarantee to find the optimal selection but can provide an acceptable selection 
+in less time
+− Two variations:
+• Backward sequential selection
+• Forward sequential selection
+Feature selection
+Alberto Ortiz (last update 13/10/2025)
+
+• Suboptimal solutions: Backward sequential selection
+− Select a suitable score 𝑆, e.g. separability indices 𝐽1, 𝐽2 or 𝐽3, etc.
+− Let us assume that 𝑆 increases the better the combination
+− Starting from all features, progressively remove features until reaching the required 
+amount (of features)
+− At each iteration keep the combination with the largest score
+
+
+
+S = 2 S = 6 S = 4S = 1
+S = 8 S = 10 S = 12
+f1,f2,f3,f4
+f1,f2,f3 f1,f2,f4 f1,f3,f4 f2,f3,f4
+f1,f2 f1,f3 f2,f3
+f1,f2 f1,f4 f2,f4
+f1,f3 f1,f4 f3,f4
+f2,f3 f2,f4 f3,f4
+Feature selection
+Alberto Ortiz (last update 13/10/2025)
+
+• Suboptimal solutions: Forward sequential selection
+− Select a suitable score S, e.g. separability indices J1, J2 or J3, etc.
+− Let us assume that S increases the better the combination
+− Starting with one feature, progressively add characteristics until the required number of 
+features is reached
+− At each step keep the combination with the largest score
+
+
+
+S=1
+S=5
+S=2
+S=3
+S=10
+S=7
+S=8
+S=11
+S=15
+f1
+f2
+f3
+f4
+f2,f1
+f2,f3
+f2,f4
+f2, f1,f3
+f2,f1,f4
+Feature selection
+Alberto Ortiz (last update 13/10/2025)
+
+• Example:
+Feature selection
+Alberto Ortiz (last update 13/10/2025)
+import numpy as np
+from sklearn.datasets import load_diabetes
+diabetes = load_diabetes()
+X, y = diabetes.data, diabetes.target
+print(diabetes.DESCR)
+from sklearn.feature_selection import SequentialFeatureSelector
+from sklearn.linear_model import RidgeCV
+ridge = RidgeCV(alphas=np.logspace(-6, 6, num=5)).fit(X, y)
+sfs_forward = SequentialFeatureSelector(
+ridge, n_features_to_select=2, direction="forward"
+).fit(X, y)
+sfs_backward = SequentialFeatureSelector(
+ridge, n_features_to_select=2, direction="backward"
+).fit(X, y)
+feature_names = np.array(diabetes.feature_names)
+print(
+"Features selected by forward sequential selection: "
+f"{feature_names[sfs_forward.get_support()]}"
+)
+print(
+"Features selected by backward sequential selection: "
+f"{feature_names[sfs_backward.get_support()]}"
+)
+Features selected by forward sequential 
+selection: ['bmi' 's5']
+Features selected by backward sequential 
+selection: ['bmi' 's5']
+Diabetes dataset
+----------------
+Ten baseline variables, age, sex, body mass 
+index, average blood pressure, and six blood 
+serum measurements were obtained for each of 
+n = 442 diabetes patients, as well as the 
+response of interest, a quantitative measure 
+of disease progression one year after 
+baseline.
+:Number of Attributes: First 10 columns are 
+numeric predictive values
+:Target: Column 11 is a quantitative measure 
+of disease progression one year after 
+baseline
+:Attribute Information:
+- age age in years
+- sex
+- bmi body mass index
+- bp  average blood pressure
+- s1  tc, total serum cholesterol
+- s2  ldl, low-density lipoproteins
+- s3  hdl, high-density lipoproteins
+- s4  tch, total cholesterol / HDL
+- s5  ltg, log of serum triglycerides level
+- s6  glu, blood sugar level
+
+Alberto Ortiz (last update 13/10/2025)
+Contents
+• Introduction
+• Data exploration (and first cleaning)
+• Data preprocessing (incl. cleaning)
+• Goodness measures
+• Feature selection
+• Dimensionality reduction
+• Pipelines
+Next week, practical session on Thursday: L2
+• Laptops available ?
+• Description of work to do available on Monday in the 
+webpage
+• Revise the notes of lecture 2, try to reproduce the examples
+Change in first exam date: L1, L2 - from 19/10 to 2/11/2023
+(L3, L4, L6a – 21/12/2023 & L5, L6b – 1/02/2024)
+
+• Dimensionality reduction (DR) refers to the transformation of the original data into a 
+reduced-dimension space, i.e. a new set of features of lower dimensionality
+– Also termed as feature extraction
+• One can find several DR methods in the literature:
+– Principal Component Analysis (PCA) and variants (Sparse PCA, Kernel PCA, etc.)
+– Other matrix factorizations:
+• Non-negative Matrix Factorization (NMF)
+• Independent Component Analysis (ICA)
+• Truncated Singular Value Decomposition
+– Multi-dimensional Scaling (MDS)
+– t-distributed Stochastic Neighbor Embedding (t-SNE)
+Dimensionality reduction
+Alberto Ortiz (last update 13/10/2025)
+rather for visualizing high-
+dimensional data
+
+• PCA is a popular technique for dealing with large high-dimensional datasets
+– The aim is to derive new features as linear combinations of the original 
+variables in decreasing order of importance
+𝑥𝑘
+′ = 𝛼1𝑥1 + 𝛼2𝑥2 + ⋯ + 𝛼𝐿𝑥𝐿
+– Also named as the discrete Karhunen-Loeve transform (KLT) in signal 
+processing, proper orthogonal decomposition (POD) in mechanical 
+engineering, etc.
+– Useful also for other purposes, e.g. visualization of multi-dimensional data
+through lower-dimensional representations (retain maximum information as 
+the dimensionality is reduced)
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+
+• A simple example:
+• Which feature should we get rid of?
+– 𝑥1 is not useful from the discrimination point of view
+– 𝑥2 allows discriminating between the two classes
+ 𝑥2 carries more information than 𝑥1, and this coincides with 𝜎𝑥1
+2 < 𝜎𝑥2
+2
+ if we have to choose, better to get rid of 𝑥1, the one with lowest variance
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+=  0.008
+= 0.256
+
+
+• A more complex example:
+• Which feature should we get rid of? Now is not so clear …
+– Better consider a different set of axes/features, 𝑥1
+′ and 𝑥2
+′ , to try to maximize the variance 
+in one of the axes/features
+– In the plot, 𝑥1
+′ would be the direction of largest variance, and 𝑥2
+′ would be the next in 
+variance that is orthogonal to 𝑥1
+′
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+=  0.280
+= 0.257
+𝑥1
+′
+𝑥2
+′
+
+
+• PCA finds automatically axes 𝑥1
+′ , 𝑥2
+′ , …
+1. center the values of each feature by 
+subtracting the mean 𝑋 = 𝑋org − ത𝑋
+2. compute the scatter / covariance matrix A = 𝑋𝑇𝑋
+3. obtain the eigenvalues 𝜆𝑖 and eigenvectors 𝜈𝑖 of 𝐴, 
+i.e. 𝐴𝑖 = 𝑖𝑖
+✓ the eigenvectors constitute an orthonormal basis and 
+each eigenvalue is the variance along one axis,
+i.e. the corresponding eigenvector
+• PCA can be thought of as fitting an L-dimensional hyperellipsoid to the data
+– Each axis of the ellipsoid represents a principal component
+• If one axis of the ellipsoid is short, it is because the variance along that axis is small
+• 𝑥1 and 𝑥2 features are linearly correlated (when 𝑥1 grows, 𝑥2 grows proportionally), 
+but data points projected onto the resulting orthogonal basis 1 − 2 are no longer correlated
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+𝑥1
+𝑥2
+1st component = minimal inertia axis
+2nd component = maximal inertia axis
+
+
+• Given the data matrix 𝑋 which has been mean-centered (𝑋 =  𝑋org − ത𝑋), whose 
+rows contain the data samples 𝒙𝑖 and its columns are the feature values, 
+we are looking for a set of vectors 𝑖 that constitute an orthonormal basis where the 
+data is going to be expressed in:
+• In order to maximize the variance along the
+first component we look for vector 1 such that:
+• In matrix form, this becomes:
+where 𝐴 = 𝑋𝑇𝑋 is the scatter matrix of 𝑋org( covar. matrix if divided by 𝑁 − 1).
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+𝑥1
+𝑥2
+𝑡𝑖1
+𝑡𝑖2
+1
+2
+
+𝒙𝑖 = (𝑥𝑖1, 𝑥𝑖2)
+
+
+• To find the constrained maximization problem we build the Lagrangian function 𝐿() as 
+follows:
+• The solution is given by:
+• Equation 𝐴 =   has 𝐿 solutions (𝑖, 𝑖) for 𝐴𝐿×𝐿, i.e. 𝐴𝑖 =  𝑖𝑖 , ∀𝑖
+which corresponds to the eigendecomposition of matrix 𝐴𝐿×𝐿, which in matrix form is given 
+by:
+• Linear algebra libraries typically return unit eigenvectors, so that all equations are satisfied, 
+and also ordered from largest eigenvalue to lowest eigenvalue:
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+
+
+• Then, we have to find the eigenvector  that gives rise to
+• Let us now suppose that  = j . Then:
+and:
+• The first component of PCA is therefore the eigenvector associated to the largest 
+eigenvalue, and so  = 1 if the eigenvalues are sorted.
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+
+
+• To find the second component, we have to maximize for the remaining variance:
+• Then, the Lagrangian function becomes:
+and
+• Referring to the first equation:
+• Therefore, the second component is another eigenvector of 𝐴 and hence has to be the second 
+eigenvector of 𝐴,  = 2, since 2 is the second largest eigenvalue of 𝐴.
+• The remaining components can be proved to be the remaining eigenvectors, ordered by 
+the corresponding eigenvalue from higher to lower.
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+
+
+• Now that we know that the components are the eigenvectors of matrix 𝑋𝑇𝑋, we have 
+to deal with the reduced-dimension representation.
+• To this end, we consider the fraction of the total variance that is accounted for by 
+the first 𝑝 ≤ 𝐿 components:
+– We can specify a threshold  on this ratio to choose the number of components 
+necessary to account for at least a  fraction of the total variance.
+• We can also plot the eigenvalues 
+in decreasing order (SCREE plot)
+and look for the component for 
+which the accounted variance 
+falls sharply. Two kinds of plots:
+– eigenvalues
+– fraction of total variance:  𝑖
+σ𝑗  𝑗
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+SCREE plot
+Point of inflection
+(“elbow”)
+component
+eigenvalues or % variance
+σ𝑖=1
+𝑝 var[𝜈𝑖]
+σ𝑖=1
+𝐿 var[𝜈𝑖] =
+σ𝑖=1
+𝑝 𝜆𝑖
+σ𝑖=1
+𝐿 𝜆𝑖
+
+• Once we have decided to make use of 𝑝 components, we can find the reduced-
+dimensionality vectors/samples: (we do not refer to a particular sample 𝑥𝑖)
+where 𝑝 is the reduced-dimension sample, 𝜇 is the mean and
+• The dimensionality reduction operation gives rise to an error of representation. 
+This makes interesting to know the representation 𝒙𝑝 of 𝑝 in the original 
+L-dimensional space:
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+
+
+• Example 1:
+Let us consider again
+the 4-dimensional
+Iris dataset
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+
+
+• Example 1:
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.decomposition import PCA
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+pca = PCA(n_components=2)
+# fit method already includes centering
+Xr = pca.fit(X).transform(X)
+plt.figure()
+for c in range(3):
+i = np.where(y == c)[0]
+plt.scatter(Xr[i,0],Xr[i,1])
+plt.show()
+pca = PCA(n_components=4)
+pca.fit(X)
+print(pca.explained_variance_)
+print(pca.explained_variance_ratio_)
+[4.2282 0.2427 0.0782 0.0238]
+[0.9246 0.0531 0.0171 0.0052]
+elbow
+
+• Example 1:
+Dimensionality reduction: PCA
+Alberto Ortiz (last update 13/10/2025)
+(continued)
+pca = PCA(n_components=2)
+pca.fit(X)
+Xr = pca.transform(X)
+X_ = pca.inverse_transform(Xr)
+import numpy as np
+from math import sqrt
+error_matrix = X - X_
+error_sq = np.sum(np.sum((error_matrix)**2, axis=1))
+error = sqrt(error_sq)
+N = X.shape[0]
+print('total error = %f, total error/sample = %f' % (error, error / N))
+m = np.min(np.abs(error_matrix), axis=0)
+print('min. errors: %f %f %f %f' % (m[0], m[1], m[2], m[3]))
+m = np.max(np.abs(error_matrix), axis=0)
+print('max. errors: %f %f %f %f' % (m[0], m[1], m[2], m[3]))
+m = np.min(X, axis=0)
+print('min. values: %f %f %f %f' % (m[0], m[1], m[2], m[3]))
+m = np.max(X, axis=0)
+print('max. values: %f %f %f %f' % (m[0], m[1], m[2], m[3]))
+total error = 3.899313, total error/sample = 0.025995
+min. errors: 0.001556 0.001401 0.000492 0.000810
+max. errors: 0.451606 0.463801 0.233806 0.591713
+min. values: 4.300000 2.000000 1.000000 0.100000
+max. values: 7.900000 4.400000 6.900000 2.500000
+
+• Example 2: Olivetti faces dataset, 
+400 faces of 64 × 64 pixels, 
+4096 dimensions
+Dimensionality reduction: 
+PCA
+Alberto Ortiz (last update 13/10/2025)
+
+
+• Example 2: Olivetti faces dataset, 
+400 faces of 64 × 64 pixels, 
+4096 dimensions
+Dimensionality reduction: 
+PCA
+Alberto Ortiz (last update 13/10/2025)
+p =   20 → var = 0.76
+p =   30 → var = 0.82
+p =   40 → var = 0.85
+p =   50 → var = 0.87
+p = 100 → var = 0.94
+SCREE plot
+
+
+Alberto Ortiz (last update 13/10/2025)
+Contents
+• Introduction
+• Data exploration (and first cleaning)
+• Data preprocessing (incl. cleaning)
+• Goodness measures
+• Feature selection
+• Dimensionality reduction
+• Pipelines
+
+• Scikit-learn allows chaining steps to transform data until reaching the final estimator: 
+Pipelines
+Alberto Ortiz (last update 13/10/2025)
+from sklearn import datasets
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+# Define a pipeline to search for the best combination of PCA truncation
+scaler = StandardScaler() # mu-sigma scaler to normalize inputs
+pca = PCA()               # dimensionality reduction
+logistic = LogisticRegression(max_iter=10000, tol=0.1) # classifier
+pipe = Pipeline(steps=[("scaler", scaler), ("pca", pca), ("logistic", logistic)])
+X_digits, y_digits = datasets.load_digits(return_X_y=True)
+# Parameters of pipelines can be set using '__' separated parameter names:
+param_grid = {
+"pca__n_components": [10, 20, 30, 40, 50],
+"logistic__C": [0.01, 0.1, 1, 10, 100], 
+}
+search = GridSearchCV(pipe, param_grid, n_jobs=-1)
+search.fit(X_digits, y_digits)
+print("Best configuration (CV score=%0.4f):" % search.best_score_)
+print(search.best_params_)
+Best configuration (CV score=0.8737):
+{'logistic__C': 1, 'pca__n_components’: 20}
+8px
+8px
+
+• Scikit-learn allows chaining steps to transform data until reaching the final estimator: 
+Pipelines
+Alberto Ortiz (last update 13/10/2025)
+from sklearn import datasets
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+# Define the final pipeline
+scaler = StandardScaler()
+pca = PCA(n_components=search['pca__n_components'])
+logistic = LogisticRegression(max_iter=10000, tol=0.1, C=search['logistic__C'])
+pipe = Pipeline(steps=[("scaler", scaler), ("pca", pca), ("logistic", logistic)])
+X_digits, y_digits = datasets.load_digits(return_X_y=True)
+# We use the full dataset, we do not split in training and test
+pipe.fit(X_digits, y_digits)
+yp = pipe.predict(X_digits)
+print('accuracy = %0.4f' % (accuracy_score(y_digits, yp)))
+-> accuracy = 0.8948 
+8px
+8px
+
+Lecture 2:
+Data analysis
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

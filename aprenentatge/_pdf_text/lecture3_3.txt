@@ -1,0 +1,703 @@
+Lecture 3.3
+Supervised learning:
+Decision Trees & Ensemble Learning
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+
+Alberto Ortiz (last update 17/11/2025) 2
+Contents
+• Decision trees
+• Regression trees
+• Ensemble learning
+• Random forests
+
+Alberto Ortiz (last update 17/11/2025) 3
+Definition
+• The classification process consists in the sequential application of a set of 
+questions, in which the next question depends on the result of the previous ones
+– The set of questions is organized over a directed tree as a multistage decision system.
+• Naturally handle all kind of data: metric and non-metric, any number of dimensions
+• The sequence of questions split the feature space into non-overlapping regions
+• Not all features need to be evaluated to make a decision
+
+
+• Most popular among decision trees: Ordinary Binary Classification Tree (OBCT) 
+– In general, split the space into 
+hyper-rectangles, with sides parallel 
+to the axes
+– Decision trees can always be 
+converted into OBCT (more nodes)
+– We will consider OBCT for simplicity
+Alberto Ortiz (last update 17/11/2025) 4
+Definition
+by visual inspection
+of dataset in feature space
+
+Alberto Ortiz (last update 17/11/2025) 5
+Set of Questions
+• For the OBCTs, questions are of the form is feature 𝒙𝒌  𝜶𝒌 ?
+– Once 𝛼𝑘 has been selected, a split of the training set 𝑋 is defined
+– How to select 𝑥𝑘 & 𝛼𝑘?
+• A priori, it seems there are infinite possibilities regarding the 𝛼𝑘
+• Actually, only the 𝑛𝑘  𝑁 different values taken by feature 𝑘 within 𝑋 have to be 
+considered
+𝛼𝑘 would be taken halfway between consecutive distinct values of 𝑥𝑘
+e.g. if 𝑋 = {(0.4, 0.2), (0.56, 0.1), (1.0, −0.5), (3.2, 2.0), (−1.5, −1.5)} the 
+candidate questions would be as follows: 
+• Now, we have to choose which question from the candidates  which 𝑥𝑘 & 𝛼𝑘 ?
+– Choose the best split according to a splitting criterion
+
+
+Alberto Ortiz (last update 17/11/2025) 6
+Splitting Criterion
+• Quantify node impurity and split so that the overall impurity 𝐼(𝑁𝑡
+𝑌) and 𝐼(𝑁𝑡
+𝑁) of the 
+descendant nodes 𝑁𝑡
+𝑌 and 𝑁𝑡
+𝑁 is optimally decreased with respect to the ancestor 
+node’s impurity 𝐼(𝑁𝑡)
+– Impurity for node 𝑁𝑡 comprising samples 𝑋𝑡  𝑋: entropy 𝐻 (ID3), Gini index 𝐺 (CART)
+𝐼 𝑁𝑡 = 𝐻 𝑋𝑡 = − σ𝑖=1
+𝑀 𝑃 𝜔𝑖 𝑁𝑡 𝑙𝑜𝑔2 𝑃 𝜔𝑖 𝑁𝑡
+𝐼 𝑁𝑡 = 𝐺 𝑋𝑡 = σ𝑖=1
+𝑀 𝑃 𝜔𝑖 𝑁𝑡 1 − 𝑃 𝜔𝑖 𝑁𝑡 = 1 − σ𝑖=1
+𝑀 𝑃 𝜔𝑖 𝑁𝑡 2
+where 𝑃(𝜔𝑖 | 𝑁𝑡) = 𝑃(𝑥 ∈ 𝜔𝑖| 𝑥 ∈ 𝑋𝑡)
+• In practice, 𝑃(𝜔𝑖 | 𝑁𝑡) =
+𝑛𝑡
+𝑖
+𝑛𝑡
+, where 𝑛𝑡
+𝑖 is the number of elements of 𝑋𝑡 that belongs to 𝜔𝑖
+– Impurity is maximum if 𝑃(𝜔𝑖|𝑁𝑡) = 1/𝑀 ∀𝑖, and minimum if 𝑖 | 𝑃(𝜔𝑖|𝑁𝑡) = 1 for a 
+certain class 𝜔𝑖 𝐻:  0 · log2 0 → 0
+– After a split, the decrease in node impurity is defined as:
+∆𝐼 𝑁𝑡 = 𝐼 𝑁𝑡 − 𝑛𝑡
+𝑌
+𝑛𝑡
+𝐼 𝑁𝑡
+𝑌 − 𝑛𝑡
+𝑁
+𝑛𝑡
+𝐼 𝑁𝑡
+𝑁
+– The goal is thus to adopt, from the set of candidate questions, the one that performs the 
+split leading to the highest decrease of impurity:
+(𝑥𝑘
+∗, 𝛼𝑘
+∗) = argmax ∆𝐼(𝑁𝑥𝑘,𝛼𝑘)
+Nt
+Nt
+N Nt
+Y
+
+Alberto Ortiz (last update 17/11/2025) 7
+Examples
+• Example 1. In a tree classification task, the set 𝑋𝑡, associated with node 𝑁𝑡, contains 𝑛𝑡 =
+10 samples. Four of these belong to class 1, four to class 2, and two to class 3. The node 
+splitting results into two new subsets 𝑋𝑡
+𝑌, with three samples from 1, and one from 2, and 
+𝑋𝑡
+𝑁, with one sample from 1, three from 2, and two from 3. Determine the decrease in 
+impurity after splitting using the entropy.
+
+
+Alberto Ortiz (last update 17/11/2025) 8
+Classification Rules
+• Stop-splitting rule: 
+When one decides to stop splitting a node 𝑁𝑡 and declares it as a leaf of the tree?
+1. Stop if node 𝑁𝑡 is pure, i.e. all the samples belong to a single class
+2. Given a threshold 𝜏𝐼 on the impurity decrease for a node, stop splitting if ∆𝐼(𝑁𝑡) <  𝜏𝐼
+3. Stop if 𝑛𝑡
+𝑌 < 𝜏𝑛 or 𝑛𝑡
+𝑁 < 𝜏𝑛
+4. Stop if, after the splitting, the depth of the tree is above a threshold 𝜏𝐷
+Alternative approach: make the tree grow to a larger size and then use a pruning criterion
+which leaf can be suppressed with the least impact on the classification error?
+• Class assignment rule: 
+Once a node is declared to be a leaf, which class label it must be given?
+– Typically: 
+
+
+Alberto Ortiz (last update 17/11/2025) 9
+Algorithm (for building OBCTs)
+
+
+Alberto Ortiz (last update 17/11/2025) 10
+Final remarks
+• Algorithms for building decision trees:
+– ID3 (Iterative Dichotomiser 3) was developed in 1986 by Ross Quinlan. The algorithm creates a
+multiway tree, finding for each node (i.e. in a greedy manner) the categorical feature that will yield
+the largest information gain for categorical targets. Trees are grown to their maximum size and then
+a pruning step is usually applied to improve the ability of the tree to generalize to unseen data.
+• C4.5 is the successor of ID3. The restriction that features must be categorical was removed
+by dynamically defining a discrete attribute (based on numerical variables) that partitions the
+continuous attribute value into a discrete set of intervals. C4.5 converts the trained trees (i.e.
+the output of the ID3 algorithm) into sets of if-then rules. The accuracy of each rule is then
+evaluated to determine the order in which they should be applied. Pruning is done by
+removing a rule’s precondition if the accuracy of the rule improves without it.
+• C5.0 is Quinlan’s latest version release under a proprietary license. It uses less memory and
+builds smaller rule-sets than C4.5 while being more accurate.
+– CART (Classification and Regression Trees) is very similar to C4.5, but it differs in that it supports
+numerical target variables (regression) and does not compute rule sets. CART constructs binary
+trees using the feature and threshold that yield the largest information gain at each node.
+• Scikit-learn implements an optimized version of the CART algorithm, although the scikit-
+learn implementation does not support categorical variables for now.
+
+noyes
+Alberto Ortiz (last update 17/11/2025) 11
+Final remarks
+• More general partitions of the feature space are possible via questions of the type:
+ 
+i.e. via hyperplanes not parallel to the axes
+• In general, questions such as (𝑥) < 𝛼, 
+e.g.  𝑥 = 𝑥1
+2 + 𝑥2
+2 − 2𝑥1 − 2𝑥2 + 2
+– This can lead to a better partition 
+of the feature space but training gets more difficult !!
+noyes
+(1,1)
+𝛼 = 1
+
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+iris = load_iris()
+X = iris.data[:, 2:] # petal length and width
+y = iris.target
+tree = DecisionTreeClassifier(
+criterion="gini",
+max_depth=2,
+min_samples_leaf=5,
+min_impurity_decrease=0.1,
+random_state=100)
+tree.fit(X, y)
+plot_tree(tree)
+plt.show()
+Alberto Ortiz (last update 17/11/2025) 12
+Examples
+• Example 2
+setosa
+versicolor virginica
+regularization hyperparameters
+• avoid overfitting
+• only some hyperparameters are shown, 
+there are others
+
+Alberto Ortiz (last update 17/11/2025) 13
+Examples
+• Example 3. Effect of regularization parameters
+– Left: overfitting, Right: will probably generalize better
+– Left: The splitting process continues until all nodes are pure if not stopped before
+– Right: Increasing min_* hyperparameters and/or reducing max_* hyperparameters 
+regularize the model, and avoids overfitting
+
+
+Alberto Ortiz (last update 17/11/2025) 14
+Contents
+• Decision trees
+• Regression trees
+• Ensemble learning 
+• Random forests
+
+Alberto Ortiz (last update 17/11/2025) 15
+Regression trees
+• Decision trees are also capable of performing regression tasks. 
+By way of example, we can build a regression tree using scikit-learn:
+• The tree will look very similar 
+to the classification tree 
+we have built earlier. 
+• The main difference is that 
+instead of predicting a class, 
+it will predict a value.
+from sklearn.tree import DecisionTreeRegressor
+# 1D quadratic synthetic dataset
+m = 100
+X = 6 * np.random.rand(m,1) - 3
+y = 0.5 * X**2 + X + 2 + np.random.randn(m,1)
+tree = DecisionTreeRegressor(max_depth=2)
+tree.fit(X, y)
+
+Alberto Ortiz (last update 17/11/2025)
+from sklearn.tree import DecisionTreeRegressor
+# 1D quadratic synthetic dataset
+m = 100
+X = 6 * np.random.rand(m,1) - 3
+y = 0.5 * X**2 + X + 2 + np.random.randn(m,1)
+tree = DecisionTreeRegressor(max_depth=2)
+tree.fit(X, y)
+16
+Regression trees
+• Example 1
+Noisy quadratic dataset 
+To use a regression tree, one has to traverse 
+the tree starting at the root until reaching a leaf 
+node, 
+e.g. for 𝑥 = 0.6 the prediction would be 1.663
+MSE global: 
+1
+4 σ𝑗 𝑒𝑗
+2= 0.8553
+
+Alberto Ortiz (last update 17/11/2025) 17
+Regression trees
+• In regression trees, predictions are obtained as the average target value for the samples 
+associated to the corresponding leaf node
+– The quality of the predictions is calculated as the Mean Squared Error (MSE) of the target 
+values for the involved samples, i.e. for a node 𝑁𝑡:
+• For the previous example, if we increase the tree depth, the MSE values get lower:
+– Average MSE for max_depth = 2 → 0.8553
+– Average MSE for max_depth = 3 → 0.6216
+MSE at leaves (max. depth = 3)
+1 2 3 4
+0.4450 0.2905 0.9338 0.6226
+5 6 7 8
+0.7204 1.0334 0.3388 0.5881
+
+Alberto Ortiz (last update 17/11/2025) 18
+Regression trees
+• The tree building algorithm works mostly the same way as for classification trees, except that 
+instead of trying to split the training set in a way that minimizes impurity, it now tries to split the 
+training set in a way that minimizes the MSE:
+– The node with the highest reduction in MSE is chosen for splitting
+• Just like for classification tasks, regression trees are also prone to overfitting if no 
+regularization is performed:
+
+
+Alberto Ortiz (last update 17/11/2025) 19
+Regression trees
+• Example 2
+California housing dataset: 
+– Median house value for California districts expressed in $100,000 
+(1990 U.S. census, using one row per census block group [= smallest geographical unit that is 
+published])
+– 20640 samples, 8 features, target 𝑦 ∈ 0.15 − 5
+from sklearn.datasets import fetch_california_housing
+from sklearn.tree import DecisionTreeRegressor
+X, y = fetch_california_housing(return_X_y=True)
+tree = DecisionTreeRegressor(max_leaf_nodes=10)
+tree.fit(X, y)
+MSE at leaves
+1 2 3 4 5
+0.670 0.394 0.702 1.168 0.536
+6 7 8 9 10
+0.438 0.509 1.006 0.526 0.778
+
+Alberto Ortiz (last update 17/11/2025) 20
+Contents
+• Decision trees
+• Regression trees
+• Ensemble learning 
+• Random forests
+
+Alberto Ortiz (last update 17/11/2025) 21
+Ensemble learning
+• Suppose you ask a complex question to thousands of random people and then 
+aggregate their answers
+– In many cases you will find that this aggregated answer is better than a single expert’s 
+answer 
+– This is called the wisdom of the crowd
+• Similarly, if you aggregate the predictions of a group of predictors (classifiers or 
+regressors), you will often get better predictions than with the best individual predictor
+– A group of predictors is called an ensemble
+– Hence, this technique is called Ensemble Learning
+– An Ensemble Learning algorithm is called an Ensemble method
+• In general, ensemble classifiers scale very well as training and predictions can be 
+performed in parallel, i.e. via different CPU cores/servers
+• You will often use ensemble methods near the end of a project, once you have 
+already built a few good predictors, to combine them into an even better predictor
+
+Alberto Ortiz (last update 17/11/2025) 22
+Ensemble learning
+• It is possible to find a number of ensemble methods:
+– Voting (hard and soft voting)
+– Bagging (and pasting)
+– Stacking (and blending)
+– Boosting (Adaptive boosting/Adaboost and variants, Gradient boosting/Gradient boosted 
+regression trees [GBRT], Extreme gradient boosting [XGB])
+– Others …
+• In this section, we will discuss the voting, bagging and stacking ensemble methods
+– The boosting methods are built by sequentially adding predictors to an ensemble, each 
+one correcting its predecessor
+… while voting, bagging and stacking consider all the available predictors at once
+
+Alberto Ortiz (last update 17/11/2025) 23
+Voting classifier
+• Suppose you have trained a few classifiers, each one achieving a certain accuracy
+e.g. a Logistic Regression classifier, a Perceptron, a Decision Tree, and maybe a few more
+Logistic 
+Regression Perceptron
+Decision
+Tree Other
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import Perceptron
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+log_clf = LogisticRegression()
+per_clf = Perceptron(tol=1e-3)
+tre_clf = DecisionTreeClassifier(
+criterion="gini",
+max_depth=2,
+min_samples_leaf=5,
+min_impurity_decrease=0.1)
+for clf in (per_clf, log_clf, tre_clf):
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+print(accuracy_score(y_test, y_pred))
+from sklearn.model_selection
+import train_test_split
+from sklearn.datasets import make_moons
+X, y = make_moons(n_samples=600, noise=0.4)
+X_train, X_test, y_train, y_test = 
+train_test_split(X, y, test_size=0.3)
+0.7444 # Perceptron
+0.8222 # Logistic Regression
+0.7778 # Decision Tree
+
+
+Alberto Ortiz (last update 17/11/2025) 24
+Voting classifier
+• A very simple way to create a 
+better classifier is to aggregate 
+the predictions of each classifier 
+and predict the class that gets 
+the most votes. 
+– This majority-vote classifier is 
+called a hard voting classifier.
+New sample
+from sklearn.ensemble import VotingClassifier
+vot_clf = VotingClassifier(
+estimators=[('per', per_clf), ('lr', log_clf), 
+('dt', tre_clf)], voting='hard')
+vot_clf.fit(X_train, y_train)
+y_pred = vot_clf.predict(X_test)
+print(accuracy_score(y_test, y_pred))
+ 0.8278 # hard voting classif.
+
+Alberto Ortiz (last update 17/11/2025) 25
+Voting classifier
+• If the classifiers are able to estimate class probabilities, then you can take them into 
+account and get a soft voting classifier. 
+– In scikit-learn, the individual classifiers has to have a predict_proba()method
+– In such a case, voting = “soft”.
+0.8167 # soft voting classif.
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import VotingClassifier
+gnb_clf = GaussianNB()
+vot_clf = VotingClassifier(
+estimators=[('gnb', gnb_clf), ('lr', log_clf), 
+('dt', tre_clf)], voting='soft')
+vot_clf.fit(X_train, y_train)
+y_pred = vot_clf.predict(X_test)
+print(accuracy_score(y_test, y_pred))
+
+Alberto Ortiz (last update 17/11/2025) 26
+Bagging
+• Apart from using different models and voting on the results, one can use the same 
+model but trained on different random subsets of the training set:
+– Bagging (bootstrap aggregating): sampling with replacement (bootstrapping in statistics)
+– Pasting: sampling without replacement
+• Once all predictors are trained, the ensemble can make a prediction for a new 
+sample by simply aggregating the predictions for all:
+– statistical mode for classification
+– average for regression
+• Individual predictors may have a higher bias than 
+trained on the full dataset
+• The ensemble has a similar bias than the individual 
+predictors trained on the full dataset but lower variance
+
+Alberto Ortiz (last update 17/11/2025) 27
+Bagging
+• The following code trains an ensemble of decision trees (= ntree), each trained on 
+100 training samples randomly chosen from the training set with replacement
+– The bagging classifier automatically performs soft voting if the base classifier, e.g.
+decision tree, can estimate class probabilities
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import BaggingClassifier
+tree_clf = DecisionTreeClassifier()
+tree_clf.fit(X_train, y_train)
+y_pred_t = tree_clf.predict(X_test)
+print(accuracy_score(y_test, y_pred_t))
+bag_clf = BaggingClassifier(
+DecisionTreeClassifier(), n_estimators=ntree,
+max_samples=100, bootstrap=True, n_jobs=-1)
+bag_clf.fit(X_train, y_train)
+y_pred_e = bag_clf.predict(X_test)
+print(accuracy_score(y_test, y_pred_e))
+0.8056 # tree classifier
+0.8722 # bagging classifier (10)
+0.8556 # bagging classifier (500)
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import make_moons
+X, y = make_moons(n_samples=600, noise=0.4)
+X_train, X_test, y_train, y_test = 
+train_test_split(X, y, test_size=0.3)
+
+
+Alberto Ortiz (last update 17/11/2025) 28
+Bagging
+• With bagging, some instances may be sampled several times for any given predictor 
+(because it is sampling with replacement), while others may not be sampled at all.
+• The training samples that are not chosen are called out-of-bag (oob) samples.
+• Since a predictor never sees the oob samples during training, it can be evaluated on 
+these samples, without the need for a separate validation set, as this code shows:
+• Bagging can be easily applied to regression problems (provided the base model is 
+also a regression model):
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import BaggingClassifier
+bag_clf = BaggingClassifier(
+DecisionTreeClassifier(), n_estimators=500,
+max_samples=100, bootstrap=True, n_jobs=-1, 
+oob_score=True)
+bag_clf.fit(X_train, y_train)
+print(bag_clf.oob_score_)
+y_pred_e = bag_clf.predict(X_test)
+print(accuracy_score(y_test, y_pred_e))
+0.8690 # from OOB
+0.8556 # from test set
+rf_reg = BaggingRegressor(DecisionTreeRegressor(),
+n_estimators=500, max_samples=100, n_jobs=-1)
+
+Alberto Ortiz (last update 17/11/2025) 29
+Stacking
+• Stacking is a short form for stacked generalization
+• Instead of using trivial functions (such as hard voting) to aggregate the predictions, 
+this ensemble method trains a model to perform the aggregation 
+• By way of example, let us consider 
+a regression task:
+– Each of the ensemble models, 
+named as first-layer predictors, 
+predict a different value: 3.1, 2.7, 2.9
+– The final predictor, named as blender,
+meta learner or second-layer predictor, 
+takes these predictions as inputs and 
+makes the final prediction 3.0
+• Notice that the layer 2 can implement any form of aggregation:
+– Therefore, weighted average and even voting can be considered as particular cases of 
+stacking, where the layer 2 implements (a) the average of the predictors’ outputs or 
+(b) a majority voting mechanism
+sample
+predictors
+predictions
+blender
+
+Alberto Ortiz (last update 17/11/2025) 30
+Stacking
+• Training can be accomplished in several ways: 
+– by means of the hold-out set concept, leading to blending instead of stacking
+or
+– by means of k-fold cross validation, giving rise to the stacking method itself
+• Let us illustrate the blending method first: the hold-out set concept splits the training 
+set into two subsets, where
+– the subset 1 is used for training the first-layer predictors
+– the subset 2 is used for training the blender
+ the blender learns to predict the target value 
+given the first-layer predictions
+ 3D
+2D
+(= output of ind. models)
+
+Alberto Ortiz (last update 17/11/2025) 31
+Stacking
+• A python implementation of stacking follows: (moons dataset)
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import StackingClassifier
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, 
+test_size=0.3)
+# build layer 1
+layer1 = []
+layer1.append(('bc', GaussianNB()))
+layer1.append(('lr', LogisticRegression()))
+layer1.append(('dt', DecisionTreeClassifier()))
+# build stack    
+layer2 = LogisticRegression(penalty=None)
+ensemble_clf = StackingClassifier(estimators=layer1, 
+final_estimator=layer2, cv=5)
+# 1. train & evaluate individual classifiers
+for name, model in layer1:
+acc = model.fit(X_train, y_train).score(X_test,y_test)
+print('%s %.3f' % (name, acc))
+# 2. train & evaluate ensemble classifier, retrain ind. clas.
+acc = ensemble_clf.fit(X,y).score(X_test,y_test)
+print('%s %.3f (%.3f)' % ('stacking',acc))
+bc 0.828
+lr 0.822
+dt 0.806
+stacking 0.833
+Stacking: 
+• The 1st layer estimators are 
+trained using the training set
+• The 2nd layer estimator is 
+trained through cross-validation
+
+Alberto Ortiz (last update 17/11/2025) 32
+Stacking
+• A python implementation of stacking follows: (moons dataset)
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import StackingClassifier
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import RepeatedStratifiedKFold
+# build layer 1
+layer1 = []
+layer1.append(('bc', GaussianNB()))
+layer1.append(('lr', LogisticRegression()))
+layer1.append(('dt', DecisionTreeClassifier()))
+# build stack    
+layer2 = LogisticRegression(penalty=None)
+ensemble_clf = StackingClassifier(estimators=layer1, 
+final_estimator=layer2)
+# 1. train & evaluate individual classifiers
+for name, model in layer1:
+scores = evaluate_model(model, X, y)
+print('%s %.3f (%.3f)' % 
+(name, np.mean(scores), np.std(scores)))
+# 2. train & evaluate ensemble classifier
+scores = evaluate_model(ensemble_clf, X, y)
+print('%s %.3f (%.3f)' % 
+('stacking', np.mean(scores), np.std(scores)))
+def evaluate_model(model, X, y):
+cv = RepeatedStratifiedKFold(
+n_splits=10,n_repeats=3)
+scores = cross_val_score(model, X, y, 
+scoring='accuracy', cv=cv, 
+n_jobs=-1, error_score='raise')
+return scores
+bc 0.850 (0.045)
+lr 0.849 (0.045)
+dt 0.796 (0.045)
+stacking 0.852 (0.047)
+30 evaluations !!
+
+Alberto Ortiz (last update 17/11/2025) 33
+Stacking
+• A python implementation of stacking follows (cont.)
+
+
+Alberto Ortiz (last update 17/11/2025) 34
+Stacking
+• It is actually possible to train several blenders, e.g. using different classifiers, to get a 
+whole layer of blenders
+• Now, the trick is to split the training set into 
+three subsets: 
+– the 1st subset is used to train the first layer, 
+– the 2nd subset is used to create the training set 
+for the second layer (using predictions made by 
+the predictors of the first layer), and
+– the 3rd subset is used to create the training set 
+for the third layer (using predictions made 
+by the predictors of the second layer)
+• Once all this is done, we can make a prediction 
+for a new sample by going through each layer sequentially
+• In scikit-learn, multiple stacking layers can be achieved by assigning final_estimator
+to a StackingClassifier
+sample
+
+Alberto Ortiz (last update 17/11/2025) 35
+Contents
+• Decision trees
+• Regression trees
+• Ensemble learning 
+• Random forests
+
+Alberto Ortiz (last update 17/11/2025) 36
+Random Forests
+• A random forest (RF) is an ensemble of decision trees, generally trained via the 
+bagging method (sometimes pasting):
+– It has proved so successful that this ensemble method has its own name and an 
+optimized implementation:
+– With a few exceptions, an RF has all the hyperparameters of a DT, e.g. to control how 
+trees are grown, plus all the hyperparameters of a bagging classifier to control the 
+ensemble itself
+bag_clf = BaggingClassifier(
+DecisionTreeClassifier(), n_estimators=500, bootstrap=True, n_jobs=-1)
+bag_clf.fit(X_train, y_train)
+from sklearn.ensemble import RandomForestClassifier
+rf_clf = RandomForestClassifier(n_estimators=500, n_jobs=-1)
+rf_clf.fit(X_train, y_train)
+rf_clf = RandomForestClassifier(min_samples_leaf=10, max_depth=4, 
+n_estimators=500, max_samples=100, n_jobs=-1)
+
+Alberto Ortiz (last update 17/11/2025) 37
+Random Forests
+• Actually, an RF introduces extra randomness when growing trees: 
+– Instead of searching for the best feature when splitting a node, it searches for the best 
+feature among a random subset of features
+– This results in a greater tree diversity, and generally yielding an overall better model
+• splitter = “random” → choose the best split for a random subset of features
+• max_samples = 1.0 → use all samples for training
+• As expected, random forests can be used for both classification and regression
+tasks
+ from sklearn.ensemble import RandomForestRegressor
+rf_reg = RandomForestRegressor(n_estimators=500, max_depth=2, 
+max_samples=100, n_jobs=-1)
+rf_reg.fit(X_train, y_train)
+rf_clf = RandomForestClassifier(n_estimators=500, n_jobs=-1)
+rf_clf.fit(X_train, y_train)
+bag_clf = BaggingClassifier(
+DecisionTreeClassifier(splitter="random"),
+n_estimators=500, max_samples=1.0, bootstrap=True, n_jobs=-1)
+
+Alberto Ortiz (last update 17/11/2025) 38
+Random Forests
+• An Extremely Randomized Trees ensemble (or Extra-Trees, ET, for short) 
+incorporates more randomness than RF:
+– Instead of optimizing the threshold at each splitting, these thresholds are chosen 
+randomly
+– This trades more bias for a lower variance
+– It also makes ET much faster to train than regular RF 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import ExtraTreesClassifier
+rf_clf = RandomForestClassifier(n_estimators=500, n_jobs=-1)
+rf_clf.fit(X_train, y_train)
+yp_rf = rf_clf.predict(X_test)
+print(accuracy_score(y_test, yp_rf))
+et_clf = ExtraTreesClassifier(n_estimators=500, n_jobs=-1)
+et_clf.fit(X_train, y_train)  
+yp_et = et_clf.predict(X_test)
+print(accuracy_score(y_test, yp_et))
+0.8500 (time = 0.5806 ± 0.0282 seconds, ±3)
+0.8278 (time = 0.4552 ± 0.0257 seconds, ±3)
+
+
+Alberto Ortiz (last update 17/11/2025) 39
+Random Forests
+• Yet another great quality of Random Forests is that they make it easy to measure the 
+relative importance of each feature:
+– One can measure the importance of each feature by looking at how much the tree 
+nodes that use that feature reduce impurity on average (across all trees in the forest)
+– More precisely, one can give a weighted average, where each node’s weight is equal to 
+the fraction of training samples associated with it
+from sklearn.datasets import load_iris
+from sklearn.ensemble import RandomForestClassifier
+iris = load_iris()
+rf_clf = RandomForestClassifier(n_estimators=500, n_jobs=-1)
+rf_clf.fit(iris["data"], iris["target"])
+for name, score in zip(iris["feature_names"],rf_clf.feature_importances_):
+print(name, score) 
+sepal length (cm) 0.1062
+sepal width (cm)  0.0269
+petal length (cm) 0.4434
+petal width (cm)  0.4235
+
+Lecture 3.3
+Supervised learning:
+Decision Trees & Ensemble Learning
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

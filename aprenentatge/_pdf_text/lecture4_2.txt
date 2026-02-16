@@ -1,0 +1,633 @@
+Instance-based learning:
+Support Vector Machines
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+Alberto Ortiz (last update 30/11/2025) 2
+Review on hyperplanes
+• One can find several hyperplanes to separate the 2D toy dataset below:
+which could be the result of e.g. the perceptron algorithm:
+• Do we have any reason to choose one solution against the others? 
+← the rightmost one seems 
+more robust to data noise,
+i.e. the model would
+keep valid even 
+if the “true” samples
+were anywhere within
+their tolerance hypervolumes
+
+
+Alberto Ortiz (last update 30/11/2025) 3
+Review on hyperplanes
+• We can also quantify noise tolerance from the viewpoint of the separator, defining a 
+“cushion” on each side of the separator, the largest one we can define:
+– We call such a “cushion” as the margin of the separator, so that the thicker the larger is 
+the noise margin of the separator
+• In this lecture we will address several points in this regard:
+– Can we efficiently find the largest margin hyperplane?
+– What can we do if the data is not linearly separable?
+
+
+Alberto Ortiz (última revisión 30/11/2025) 4
+Contents
+• Formulation of the SVM problem for linearly separable classes
+• SVM training for linearly separable classes
+• Non-linearly separable classes
+• Non-linear SVM
+• Numerical examples
+• Final remarks
+
+Alberto Ortiz (last update 30/11/2025) 5
+Formulation of the SVM problem
+• Let xi, i = 1,…,N, be the feature vectors
+of the training set X, which belong to one
+of two linearly separable classes 1 and 2
+• The goal is to find the separating hyperplane 
+with the largest margin (max. margin classifier)
+– We expect that the larger the margin 
+the better the generalization of the classifier
+– If we do not want to give preference to
+one class over the other, we look for 
+the hyperplane that is at the same orthogonal
+distance to the nearest samples from 1 and 2
+ determine the (w,w0) that leads to the
+maximum margin, i.e. maximum orthogonal distance
+• Support Vectors  nearest samples 
+(most informative for classification)
+• SVM  optimum hyperplane
+
+Alberto Ortiz (last update 30/11/2025) 6
+Formulation of the SVM problem
+• An additional fact about classification rules based on hyperplanes, i.e. g(x) = wTx + w0
+x*
+
+Alberto Ortiz (last update 30/11/2025) 7
+Formulation of the SVM problem
+• Let us define class indicators yi for every sample xi
+• To solve the SVM problem, we need to maximize the margin for the xi’s closest to the 
+separating hyperplane:
+• Let us suppose now ||w|| = 1 and
+that final opposite support vectors are 
+at a distance 2z from each other.
+Then: 
+
+
+Alberto Ortiz (last update 30/11/2025) 8
+Formulation of the SVM problem
+• We can solve for w* = w / z and w0* = w0 / z = w Tx0 / z and free us from the scale 
+factor of (w,w0) [ wT(x - x0) = wTx + w0 = 0 = (w*)Tx + w0* ] when maximizing
+• For appropriately scaled (w, w0), we have ∀𝑥𝑖, 𝑦𝑖𝑔 𝑥𝑖 = 𝑦𝑖(𝑤𝑇𝑥𝑖 + 𝑤0) ≥ 1
+and support vectors lie on hyperplanes 𝑦𝑖𝑔 𝑥𝑖 = 𝑦𝑖 𝑤𝑇𝑥𝑖 + 𝑤0 = 1
+ 
+• From this, we can write max
+𝑤
+min
+𝑖
+𝑦𝑖𝑔(𝑥𝑖)
+𝑤 = max
+𝑤
+1
+𝑤 ≡ min
+𝑤
+𝑤
+• According to all the aforementioned, the SVM problem finally becomes into a 
+quadratic optimization problem with linear constraints/inequalities:
+
+
+Alberto Ortiz (última revisión 30/11/2025) 9
+Contents
+• Formulation of the SVM problem for linearly separable classes
+• SVM training for linearly separable classes
+• Non-linearly separable classes
+• Non-linear SVM
+• Numerical examples
+• Final remarks
+
+Alberto Ortiz (last update 30/11/2025) 10
+SVM training
+• To solve the quadratic optimization problem with linear inequality constraints
+ we have to resort to the Lagrangian function and the Karush-Kuhn-Tucker (KKT) 
+conditions (necessary conditions for function extrema in problems constrained by 
+inequalities).
+
+
+Alberto Ortiz (last update 30/11/2025) 11
+Function optimization with constraints
+• We want to solve this kind of optimization problems:
+x1 + x2 = 1
+x1  -1
+
+Alberto Ortiz (last update 30/11/2025) 12
+Function optimization with constraints
+• In general:
+requires the definition of the so-called Lagrangian function:
+where {j} and {k} are the Karush-Kuhn-Tucker multipliers 
+(Lagrange multipliers if there are no inequalities)
+• The solution to the optimization problem is among the solutions of the KKT 
+conditions
+– They are necessary conditions for locating function extrema in problems constrained 
+by equalities and/or inequalities
+
+
+Alberto Ortiz (last update 30/11/2025) 13
+Function optimization with constraints
+• Example:
+
+
+Alberto Ortiz (last update 30/11/2025) 14
+SVM training
+• A first solution to the quadratic optimization problem associated to SVM training
+ is obtained by means of the corresponding Lagrangian function 
+ 
+ 
+ and the Karush-Kuhn-Tucker (KKT) conditions:
+PRIMAL 
+PROBLEM
+
+Alberto Ortiz (last update 30/11/2025) 15
+SVM training
+• Remarks:
+1)  w is a linear combination of the feature vectors for which i  0:
+2) Regarding i [yi(wTxi + w0) – 1] = 0, when i  0, the corresponding constraint 
+is called active, and makes the corresponding xi lie on either of the two 
+hyperplanes wTxi + w0 = 1.
+ xi such that i  0 are, thus, the support vectors and constitute the critical 
+elements of the training set. 
+Feature vectors corresponding to i = 0 can either lie outside the class 
+separation band, deﬁned as the region between the two hyperplanes, or they 
+can also lie on one of these hyperplanes (degenerate cases). 
+3) The resulting hyperplane is insensitive to the number and position of the 
+non-support vectors, provided they do not cross the class separation band.
+
+
+Alberto Ortiz (last update 30/11/2025) 16
+SVM training
+• Remarks:
+4)  w0 can be deduced from the active constraints:
+ 
+In practice, w0 is computed as an average value obtained from all N active 
+constraints (it is numerically safer):
+5) Due to the nature of the cost function (convex) and the constraints (linear), the 
+SVM is guaranteed to be unique.
+
+
+Alberto Ortiz (last update 30/11/2025) 17
+SVM training
+• We have yet to determine the 𝑖. To this end, w and w0 are substituted in the 
+Lagrangian using the equality constraints from the 1st solution (Wolfe dual repres.)
+• The optimization problem 
+becomes again into a quadratic
+optimization problem, to solve 
+for 𝑖
+0
+DUAL 
+PROBLEM
+
+Alberto Ortiz (last update 30/11/2025) 18
+SVM training
+•  Given:
+ the solution by means of the KKT conditions turns out to be:
+DUAL 
+PROBLEM
+
+Alberto Ortiz (last update 30/11/2025) 19
+SVM training
+• In matrix form, we can write:
+• Although the hyperplane is unique, there is no guarantee of the uniqueness of the 
+associated Lagrange multipliers i and by extension of the expansion of w in terms of 
+support vectors
+• Because of the size of this problem when N is large, a number of efficient solutions 
+have been developed (e.g. Platt's Sequential Minimal Optimization – SMO)
+
+
+Alberto Ortiz (last update 30/11/2025) 20
+SVM training
+• SVM algorithm:
+– Solve for the i, i = 1, …, N
+– Solve for w:
+– Solve for w0:
+
+
+Alberto Ortiz (last update 30/11/2025) 21
+SVM training
+• An even higher-level view:
+Wolfe dual representation
+
+
+Alberto Ortiz (last update 30/11/2025) 22
+Numerical examples
+• Example 1(a)
+𝑛 = (w1,w2)
+
+Alberto Ortiz (last update 30/11/2025) 23
+Numerical examples
+• Example 1(b)
+
+
+Alberto Ortiz (last update 30/11/2025) 24
+Numerical examples
+• Example 1(b)
+
+
+Alberto Ortiz (last update 30/11/2025) 25
+Numerical examples
+• Example 1(b)
+
+
+Alberto Ortiz (last update 30/11/2025) 26
+Numerical examples
+• Example 1(c)
+import cvxpy as cp
+X = np.array([[0.,0.],[2.,2.],[2.,0.],[3.,0.]])
+N = X.shape[0]
+y = np.array([-1.,-1.,1.,1.]).reshape((N,1))
+P = build_H(X,y)
+G = np.identity(N)
+h = np.zeros((N,1))
+A = y.reshape((1,N))
+b = 0.0
+z = cp.Variable((N,1))
+P = P + (1e-8) * np.identity(N) # for numerical stability
+prob = cp.Problem(cp.Maximize(cp.sum(z) - 0.5*cp.quad_form(z,P)),
+[G @ z >= h, A @ z == b]) 
+prob.solve()
+lm = z.value # lm = [0.5, 0.5, 1.0, 0.0]
+Using a QP solver, e.g. cvxpy:
+pip install cvxpy
+or conda install -c conda-forge cvxpy
+
+Alberto Ortiz (last update 30/11/2025) 27
+Numerical examples
+• Example 1(d)
+Using a QP solver, e.g. cvxpy:
+pip install cvxpy
+or conda install -c conda-forge cvxpy
+import cvxpy as cp
+X = np.array([[0.,0.],[2.,2.],[2.,0.],[3.,0.]])
+N = X.shape[0]
+y = np.array([-1.,-1.,1.,1.]).reshape((N,1))
+w = cp.Variable((2,1))
+w0 = cp.Variable()
+loss = cp.Minimize(0.5 * cp.square(cp.norm(w)))
+constr = []
+for i in range(N):
+xi, yi = X[i,:], y[i]
+constr += [yi @ (xi @ w + w0) >= 1]
+prob = cp.Problem(loss, constr)
+prob.solve()
+print(w.value, w0.value) # w = [1.0, -1.0], w0 = -1.0
+Solve the primal problem
+care with this formulation, since
+one does not have access to the ’s
+
+
+Alberto Ortiz (last update 30/11/2025) 28
+Numerical examples
+• Example 1(e)
+Using scikit-learn:
+from sklearn import svm
+X = np.array([[0.,0.],[2.,2.],[2.,0.],[3.,0.]])
+N = X.shape[0]
+y = np.array([-1.,-1.,1.,1.]).reshape((N,1))
+clf = svm.SVC(C = 1e16, kernel = 'linear')
+clf.fit(X, y)
+sv = clf.support_vectors_
+w = clf.coef_.flatten()
+w0 = clf.intercept_
+lm = clf.dual_coeff_.flatten()
+# sv = [[0.,0.], [2.,2.], [2.,0.]]
+# w = [1.0, -1.0], w0 = -1.0
+# lm = [-0.5, -0.5, 1] # y_i * lambda_i
+
+
+Alberto Ortiz (last update 30/11/2025) 29
+Multi-class problems
+• M-class problems
+1) Transform it into 𝑴 two-class problems (one-versus-rest [OVR], one-versus-all [OVA])
+• It is an unbalanced problem since the negative class can comprise far more samples than the 
+positive class
+2) Transform it into 𝑴(𝑴 − 𝟏)/𝟐 two-class problems (one-versus-one [OVO])
+• Sort of a voting scheme
+• Training and inference can 
+be slow for 𝑁, 𝑀 large 
+g12(x) > 0 < 0
+g13(x) > 0 < 0
+g23(x) > 0 < 0
+1 2 3
+g12(x) g13(x) g23(x) class
+< 0
+2
+< 0
+3
+< 0
+3 → 3
+< 0
+2
+< 0
+3
+> 0
+2 → 2
+< 0
+2
+> 0
+1
+< 0
+3 ?
+< 0
+2
+> 0
+1
+> 0
+2 → 2
+g12(x) g13(x) g23(x) class
+> 0
+1
+< 0
+3
+< 0
+3 → 3
+> 0
+1
+< 0
+3
+> 0
+2 ?
+> 0
+1
+> 0
+1
+< 0
+3 → 1
+> 0
+1
+> 0
+1
+> 0
+2 → 1
+
+Alberto Ortiz (última revisión 30/11/2025) 30
+Contents
+• Formulation of the SVM problem for linearly separable classes
+• SVM training for linearly separable classes
+• Non-linearly separable classes
+• Non-linear SVM
+• Numerical examples
+• Final remarks
+
+Alberto Ortiz (last update 30/11/2025) 31
+Non-linearly separable classes
+• When the classes are not linearly separable, the original setup is no longer valid
+– Any attempt to draw a hyperplane will never end up 
+with a class separation band 
+with no data points inside it 
+– For this case, we have the following classes of samples:
+1) Points that fall outside the band, at the correct side (, ):
+2) Points that fall inside the band, also at the correct side (, ):
+3) Points that are missclassified (, ):
+– This can be summarized by introducing a new set of 
+variables i (slack variables) such that 
+• In this way:
+
+
+Alberto Ortiz (last update 30/11/2025) 32
+Non-linearly separable classes
+• The goal is now 
+– to make the margin as large as possible, but at the same time 
+– to keep the number of samples with 𝜉𝑖 > 0 as small as possible
+ where 𝐶 is a positive constant that controls the relative influence of the 𝜉 term
+• The problem is solved by a Lagrangian and the Karush-Kuhn-Tucker conditions:
+SOFT MARGIN problem 
+versus 
+HARD MARGIN problem
+
+Alberto Ortiz (last update 30/11/2025)
+Non-linearly separable classes
+• The corresponding Wolfe dual representation is obtained from the primal problem:
+… substituting the above equality constraints into the Lagrangian to end up with:
+– The only difference with the linearly-separable case is the bound 𝐶 on 𝜆𝑖.
+33
+
+Alberto Ortiz (last update 30/11/2025) 34
+Non-linearly separable classes
+• Summing up:
+Hard margin formulation Soft margin formulation
+Wolfe dual representation Wolfe dual representation
+
+
+Alberto Ortiz (last update 30/11/2025) 35
+Numerical Examples
+Wolfe dual representation
+• Example 2: derive the SVM corresponding to 
+the next non-linearly separable classif. problem
+
+• Example 2:
+Alberto Ortiz (last update 30/11/2025) 36
+Numerical Examples
+using scikit-learn:
+clf = svm.SVC(C = C, kernel = 'linear')
+clf.fit(X, y)
+using a QP solver, e.g. cvxpy:
+X = np.loadtxt('svm_samples.txt')
+N = X.shape[0]
+y = np.loadtxt('svm_labels.txt')
+P = build_H(X, y)
+A = y.reshape((1,N))
+lb = np.zeros((N,1))
+ub = C * np.ones((N,1))
+z = cp.Variable((N,1))
+P = P + (1e-8) * np.identity(N)
+prob = cp.Problem(
+       cp.Maximize(cp.sum(z) - 
+    0.5*cp.quad_form(z,P)),
+           [z >= lb, z <= ub, A@z == 0.0])
+prob.solve(verbose=True, solver='SCS')
+lm = z.value
+ilm = (lm > 1e-4).flatten() # indices SV
+Wolfe dual
+representation
+
+Alberto Ortiz (última revisión 30/11/2025) 37
+Contents
+• Formulation of the SVM problem for linearly separable classes
+• SVM training for linearly separable classes
+• Non-linearly separable classes
+• Non-linear SVM
+• Numerical examples
+• Final remarks
+
+Alberto Ortiz (last update 30/11/2025) 38
+Non-linear SVM
+• Non-linear classification problems can often be solved by mapping the input feature 
+space onto a larger dimensional space, where the classes can be satisfactorily 
+separated by a hyperplane:
+• Thanks to the SVM formulation, the cost of 
+working in a higher dimension is not 
+excessive, but controlled
+– This is known as the “kernel trick”
+For instance:
+(w, w0)
+
+Alberto Ortiz (last update 30/11/2025) 39
+Non-linear SVM
+• The mapping into a higher space is incorporated in the following way:
+Hard margin formulation Soft margin formulation
+Wolfe dual representation Wolfe dual representation
+
+
+Alberto Ortiz (last update 30/11/2025) 40
+• For instance:
+• This and other functions known as kernels satisfy the following condition:
+(Mercer’s theorem characterizes these functions)
+• This is the case of:
+ and others …
+Non-linear SVM
+Kernel trick: one can operate in the original space (less computation) 
+instead of operating in the larger-dimensional space, but with the advantages of the latter
+
+
+Alberto Ortiz (last update 30/11/2025)
+• Another example:
+• In general, the expansion of an L-variate M-degree inhomogeneous polynomial is: 
+(in the following, all coefficients are assumed 1 for simplicity)
+• The number of terms of (x), and (x), is thus:
+• For instance, for L = 10 and M = 4, (x) dimension becomes 1001:
+– computing (x)T(z) means a dot product involving 1001-component vectors, 
+– while (1 + xTz)4 represents a dot product involving 10-component vectors
+Non-linear SVM
+41
+
+
+Alberto Ortiz (last update 30/11/2025)
+• Apart from the benefits of working in a higher number of dimensions at almost no 
+cost, with the “kernel trick” the classification operation becomes:
+ or:
+Non-linear SVM
+42
+If Krbf is used, the 
+classifier is known 
+as an RBF network
+features of sample x
+f1
+f2
+.
+.
+.
+fL
+𝑥 = ( 𝑓1, 𝑓2, … , 𝑓𝐿 )
+𝑁𝑠: num. support vectors
+
+Alberto Ortiz (última revisión 30/11/2025) 43
+Contents
+• Formulation of the SVM problem for linearly separable classes
+• SVM training for linearly separable classes
+• Non-linearly separable classes
+• Non-linear SVM
+• Numerical examples
+• Final remarks
+
+Alberto Ortiz (last update 30/11/2025) 44
+Numerical Examples
+• Example 3: derive the SVM corresponding to the next 2-class classification problem
+1 = { (1,1)T, (-1,-1)T } ()
+2 = { (1,-1)T, (-1,1)T } ()
+Wolfe dual representation
+y2 :
+y6 :
+f1
+f2
+
+Alberto Ortiz (last update 30/11/2025) 45
+Numerical Examples
+• Solution: 
+using a QP solver, e.g. cvxpy : 
+P = build_H_wpk(X, y, g=1, r=1, q=2)
+A = y.reshape((1,4))
+z = cp.Variable((4,1))
+prob = cp.Problem(cp.Minimize(0.5 * cp.quad_form(z,P) – cp.sum(z)),
+[z >= 0, A @ z == 0])
+prob.solve()
+l = z.value
+ilm = (lm > 1e-6).flatten() 
+
+
+Alberto Ortiz (last update 30/11/2025) 46
+Numerical Examples
+• Solution:
+y2 :
+y6 :
+𝑓1
+𝑓2
+TRANSFORMED
+SPACE
+ORIGINAL
+SPACE
+
+Alberto Ortiz (last update 30/11/2025) 47
+Numerical Examples
+Wolfe dual representation
+• Example 4: derive the SVM for the following 
+classif. problem using 𝐾(𝑥, 𝑧) = (1 +  𝑥𝑇𝑧)2
+
+• Example 4:
+Alberto Ortiz (last update 30/11/2025) 48
+Numerical Examples
+using a QP solver, e.g. cvxpy:
+X = np.loadtxt('svm_samples.txt')
+y = np.loadtxt('svm_labels.txt')
+P = build_H_wpk(X, y, g=1, r=1, q=2)
+A = y.reshape((1,N))
+lb = np.zeros((N,)); 
+ub = C * np.ones((N,))
+z = cp.Variable((N,1))
+P = P + (1e-6) * np.identity(N)
+prob = cp.Problem(
+       cp.Minimize(0.5 * cp.quad_form(z, P) 
+                       - cp.sum(z)),
+       [z >= lb, z <= ub, A @ z = 0] )
+prob.solve(solver='SCS')
+ilm = (lm > 1e-6).flatten() # indices SV
+using scikit-learn:
+clf = svm.SVC(C = C, kernel = 'poly',
+      degree = 2, coef0 = 1, gamma = 1)
+clf.fit(X, y)
+Wolfe dual representation
+standard formulation
+
+Alberto Ortiz (última revisión 30/11/2025) 49
+Contents
+• Formulation of the SVM problem for linearly separable classes
+• SVM training for linearly separable classes
+• Non-linearly separable classes
+• Non-linear SVM
+• Numerical examples
+• Final remarks
+
+Alberto Ortiz (last update 30/11/2025) 50
+Final Remarks
+• SVMs tend to be less prone to overfitting than other methods
+– Because the classifier resulting from the SVM approach depends only on the SV, which 
+are the most significative patterns for the classification task
+– Besides, the margin band contributes to the generalization performance
+– As a consequence, in general, they exhibit good generalization performance
+• The complexity of the classifier depends more on the number of SV than on the 
+dimensionality of the feature space
+– Thanks to the SVM formulation and the kernel trick, working in a higher dimension is 
+almost at zero cost
+• However:
+– There is not an efficient practical method for choosing the best kernel
+– Besides, once a kernel has been chosen, its parameters’ values, hyperparameters, have 
+to be selected
+• They are crucial to the generalization capabilities of the classifier
+– As a consequence, the most common procedure is to solve the SVM task for different 
+sets of parameters (grid search)
+
+Instance-based learning:
+Support Vector Machines
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

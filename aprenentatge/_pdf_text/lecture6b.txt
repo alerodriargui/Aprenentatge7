@@ -1,0 +1,572 @@
+Unsupervised Learning:
+Clustering validity
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+Alberto Ortiz (last update 26/01/2026) 2
+Contents
+• Introduction
+• Supplementary: Is there structure in the data?
+• The elbow method and the silhouette index
+• Dunn and Davies-Bouldin indices
+• Homogeneity, completeness and V-measure
+
+3
+Introduction
+• The three fundamental questions that need to be addressed in any typical clustering 
+scenario are: 
+1. how many clusters are present, if any
+2. which clustering technique is suitable for the given data set, and
+3. how real or good is the clustering itself.
+• The tasks of determining the number of clusters [1.] and also the validity of the 
+clusters formed [3.] are generally addressed by means of the so-called validity 
+indices
+– They can also be useful for comparing the output of different clustering algorithms [2.]
+• There are validity indices for specific algorithms, e.g. fuzzy partition coefficient
+• Validity indices can be classified as:
+– internal: they assess only clusters plausibility, most of then quantify how good a 
+particular partitioning is in terms of
+– compactness, considered as the overall proximity among the cluster elements, and
+– separation between clusters
+– external: they assume the availability of class labels ( ground truth)
+Alberto Ortiz (last update 26/01/2026)
+
+4
+Introduction
+• In the following, we will overview some clustering validation approaches:
+– clusterability measures: 
+• Scatter Plot Matrix (SPLOM) and the Parallel Coordinates Plot
+• Hopkins statistic
+• Visual Assessment of [clustering] Tendency (VAT)
+– visual tools: Elbow method and the Silhouette coefficient
+– internal indices: Dunn index and Davies-Bouldin index
+– external indices: Homogeneity, Completeness and V-measure
+among many others:
+– Calinski-Harabasz Index - internal
+– Fowlkes-Mallows score - external
+– Rand Index and Adjusted Rand Index (ARI) - external
+– Mutual Information, Normalized Mutual Information (NMI) and Adjusted Mutual 
+Information (AMI) – external
+– etc.
+Alberto Ortiz (last update 26/01/2026)
+clusterabilityadequacy
+of the 
+clustering
+
+Alberto Ortiz (last update 26/01/2026) 5
+Contents
+• Introduction
+• Supplementary: Is there structure in the data?
+• The elbow method and the silhouette coefficient
+• Dunn and Davies-Bouldin indices
+• Homogeneity, completeness and V-measure
+
+6
+Is there structure in the data?
+• Before attempting any clustering task on the data, we should test whether the data is 
+structured in clusters
+• Among many others, the Scatter Plot Matrix (SPLOM) and the parallel coordinates 
+plot are standard visualization tools, though of limited capability
+– e.g. for the Iris flower data set (Fisher's Iris data set) 
+– multivariate data set by the British statistician and biologist Ronald Fisher (1936)
+– 150 samples under four attributes: 
+• sepal length 
+• sepal width 
+• petal length 
+• petal width 
+– 3 species: 
+• setosa
+• versicolor 
+• virginica
+Alberto Ortiz (last update 26/01/2026)
+
+
+7
+Is there structure in the data?
+Alberto Ortiz (last update 26/01/2026)
+Scatter PLOt Matrix
+example source code:
+import seaborn as sb
+df = sb.load_dataset('iris')
+sb.pairplot(df, hue=‘species’)
+
+8
+Is there structure in the data?
+Alberto Ortiz (last update 26/01/2026)
+example source code (of parallel coordinates plot):
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sb
+df = sb.load_dataset('iris')
+pd.plotting.parallel_coordinates(df, 'species', color=('#0000FF', '#FFA500', '#00FF00'))
+plt.legend(loc='lower left')
+plt.show()
+
+
+9
+Is there structure in the data?
+• We can also test the hypothesis of the existence of groups versus a dataset 
+consisting of samples uniformly distributed – Hopkins statistic:
+1. Get n samples 𝑝𝑖 from the dataset 𝐷 and compute the distance to the nearest 
+neighbor 𝑑(𝑝𝑖)
+2. Generate 𝑛 points 𝑞𝑖 uniformly distributed in the feature space and compute 
+their distance 𝑑(𝑞𝑖) to the nearest neighbor in 𝐷
+3. Compute any of the two following quotients:
+4. If data are uniformly distributed (= no structure) the values of 𝐻1 and 𝐻2 get 
+around 0.5. Otherwise:
+• 𝐻1 takes values close to 0 for clusterable datasets
+• 𝐻2 takes values close to 1 for clusterable datasets
+Alberto Ortiz (last update 26/01/2026)
+
+
+10
+Is there structure in the data?
+Alberto Ortiz (last update 26/01/2026)
+
+
+11
+Is there structure in the data?
+• Example source code (Iris dataset):
+Alberto Ortiz (last update 26/01/2026)
+from sklearn import datasets
+from pyclustertend import hopkins
+X = datasets.load_iris().data
+print('H1 = ', hopkins(X,150))
+>>> H1 = 0.1764
+
+12
+Is there structure in the data?
+• VAT (Visual Assessment of [clustering] Tendency) follows a visual approach based 
+on re-ordering the proximity matrix, e.g. using a dissimilarity
+– By reordering the elements of this matrix we get a reordered proximity matrix which tries 
+to accumulate smaller dissimilarity values around the diagonal of the matrix in square 
+contiguous regions
+black = min. distance
+white = max. distance
+ 2 clusters
+Alberto Ortiz (last update 26/01/2026)
+x1 x2 x3 x4 x5
+x1 0 0.73 0.19 0.71 0.16
+x2 0.73 0 0.59 0.12 0.78
+x3 0.19 0.59 0 0.55 0.19
+x4 0.71 0.12 0.55 0 0.74
+x5 0.16 0.78 0.19 0.74 0
+x2 x4 x3 x1 x5
+x2 0 0.12 0.59 0.73 0.78
+x4 0.12 0 0.55 0.71 0.74
+x3 0.59 0.55 0 0.19 0.19
+x1 0.73 0.71 0.19 0 0.16
+X5 0.78 0.74 0.19 0.16 0
+
+
+13
+Is there structure in the data?
+• VAT (Visual Assessment of [clustering] Tendency)
+Alberto Ortiz (last update 26/01/2026)
+
+
+14
+Is there structure in the data?
+• VAT (Visual Assessment of [clustering] Tendency)
+– Example:
+Alberto Ortiz (last update 26/01/2026)
+1) x1 x2 x3 x4 x5
+x1 0 0.73 0.19 0.71 0.16
+x2 0.73 0 0.59 0.12 0.78
+x3 0.19 0.59 0 0.55 0.19
+x4 0.71 0.12 0.55 0 0.74
+x5 0.16 0.78 0.19 0.74 0
+2) x1 x2 x3 x4 x5
+x1 0 0.73 0.19 0.71 0.16
+x2 0.73 0 0.59 0.12 0.78
+x3 0.19 0.59 0 0.55 0.19
+x4 0.71 0.12 0.55 0 0.74
+x5 0.16 0.78 0.19 0.74 0
+3) x1 x2 x3 x4 x5
+x1 0 0.73 0.19 0.71 0.16
+x2 0.73 0 0.59 0.12 0.78
+x3 0.19 0.59 0 0.55 0.19
+x4 0.71 0.12 0.55 0 0.74
+x5 0.16 0.78 0.19 0.74 0
+1) I = x2, J = {x1, x3, x4, x5}
+2) I = {x2, x4}, J = {x1, x3, x5}
+3) I = {x2, x4, x3}, J = {x1, x5}
+4) I = {x2, x4, x3, x1} J = {x5}
+5) I = {x2, x4, x3, x1, x5}
+ O = [2, 4, 3, 1, 5]
+4) x1 x2 x3 x4 x5
+x1 0 0.73 0.19 0.71 0.16
+x2 0.73 0 0.59 0.12 0.78
+x3 0.19 0.59 0 0.55 0.19
+x4 0.71 0.12 0.55 0 0.74
+x5 0.16 0.78 0.19 0.74 0
+
+15
+Is there structure in the data?
+• VAT (Visual Assessment of [clustering] Tendency)
+Alberto Ortiz (last update 26/01/2026)
+x1 x2 x3 x4 x5
+x1 0 0.73 0.19 0.71 0.16
+x2 0.73 0 0.59 0.12 0.78
+x3 0.19 0.59 0 0.55 0.19
+x4 0.71 0.12 0.55 0 0.74
+x5 0.16 0.78 0.19 0.74 0
+1) I = x2, J = {x1, x3, x4, x5}
+2) I = {x2, x4}, J = {x1, x3, x5}
+3) I = {x2, x4, x3}, J = {x1, x5}
+4) I = {x2, x4, x3, x1} J = {x5}
+5) I = {x2, x4, x3, x1, x5}
+ O = [2, 4, 3, 1, 5]
+x2 x4 x3 x1 x5
+x2 0 0.12 0.59 0.73 0.78
+x4 0 0.55 0.71 0.74
+x3 0 0.19 0.19
+x1 0 0.16
+X5 0
+x2 x4 x3 x1 x5
+x2 0 0.12 0.59 0.73 0.78
+x4 0.12 0 0.55 0.71 0.74
+x3 0.59 0.55 0 0.19 0.19
+x1 0.73 0.71 0.19 0 0.16
+X5 0.78 0.74 0.19 0.16 0
+
+16
+Is there structure in the data?
+• VAT (Visual Assessment of [clustering] Tendency)
+Alberto Ortiz (last update 26/01/2026)
+x1 x2 x3 x4 x5
+x1 0 0.73 0.19 0.71 0.16
+x2 0.73 0 0.59 0.12 0.78
+x3 0.19 0.59 0 0.55 0.19
+x4 0.71 0.12 0.55 0 0.74
+x5 0.16 0.78 0.19 0.74 0
+x2 x4 x3 x1 x5
+x2 0 0.12 0.59 0.73 0.78
+x4 0.12 0 0.55 0.71 0.74
+x3 0.59 0.55 0 0.19 0.19
+x1 0.73 0.71 0.19 0 0.16
+X5 0.78 0.74 0.19 0.16 0
+
+
+17
+Is there structure in the data?
+• VAT (Visual Assessment of [clustering] Tendency)
+Alberto Ortiz (last update 26/01/2026)
+
+
+18
+Is there structure in the data?
+• VAT (Visual Assessment of [clustering] Tendency)
+– Example (Iris dataset):
+Alberto Ortiz (last update 26/01/2026)
+from sklearn import datasets
+from pyclustertend import vat, ivat
+from sklearn.preprocessing import scale
+X = scale(datasets.load_iris().data)
+print(vat(X), ivat(X))
+
+
+Alberto Ortiz (last update 26/01/2026) 19
+Contents
+• Introduction
+• Supplementary: Is there structure in the data?
+• The elbow method and the silhouette coefficient
+• Dunn and Davies-Bouldin indices
+• Homogeneity, completeness and V-measure
+
+20
+The elbow method and the silhouette coefficient
+• The elbow method analyzes how clusters compactness varies as the number of 
+clusters 𝑀 increases, and selects the minimum 𝑀∗ for which clusters compactness 
+stops increasing
+• Compactness is measured as the within-cluster-sum of distances (WCSD) for 
+different values of 𝑀:
+• Example:
+– As expected for this example, WCSD decreases most for 𝑀 = 2 and 3, while the rate of 
+decrease gets almost 0 from 𝑀 = 3. The plot looks as an arm and the critical point as an 
+elbow (at 𝑀 = 3).
+Alberto Ortiz (last update 26/01/2026)
+M
+WCSD
+
+21
+• Example: Elbow method, k-means and Iris dataset
+Alberto Ortiz (last update 26/01/2026)
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn import datasets
+iris = datasets.load_iris()
+df = pd.DataFrame(iris['data'])
+wcsd = []
+M = range(1,10)
+for j in M:
+    kmeansModel = KMeans(n_clusters=j)
+    kmeansModel.fit(df)
+    wcsd.append(kmeansModel.inertia_)
+plt.figure(figsize=(8,8))
+plt.plot(M, wcsd, 'bx-')
+plt.show()
+The elbow method and the silhouette coefficient
+
+22
+• Unfortunately, we do not always have such clearly clustered data 
+– This means that the elbow may not be that clear and sharp for each case
+• In more ambiguous cases, we may use the Silhouette index / coefficient:
+– 𝑎(𝑖) can be interpreted as a measure of how well 𝑥𝑖 is assigned to its cluster
+• The smaller 𝑎(𝑖), the better is the assignment of 𝑥𝑖 to its cluster ( is DM)
+– 𝑏(𝑖) is the smallest mean distance of 𝑥𝑖 to all points in any other cluster, of which 𝑥𝑖 is 
+not a member
+• The cluster with this smallest mean dissimilarity is said to be the neighboring 
+cluster of 𝑥𝑖 because it is the next best fit cluster for sample 𝑥𝑖
+• The larger 𝑏(𝑖), the better is the assignment of 𝑥𝑖 to its cluster ( is DM)
+Alberto Ortiz (last update 26/01/2026)
+The elbow method and the silhouette coefficient
+
+23
+– A 𝑠(𝑖) close to +1 means that the data is appropriately clustered: 
+• A small value of 𝑎(𝑖) means 𝑥𝑖 is similar to its own cluster and hence well clustered. 
+• A large 𝑏(𝑖) means 𝑥𝑖 is dissimilar to its neighbouring cluster. 
+– A 𝑠(𝑖) close to −1 indicates that 𝑥𝑖 should be rather clustered in its neighbouring cluster. 
+– A 𝑠(𝑖) near zero means the sample is at the border of two natural clusters.
+• The mean of 𝑠(𝑖) over all points of a cluster is a measure of the cluster 
+compactness:
+– The closer to +1, the better
+• The mean of 𝑠(𝑖) over all data of the entire dataset is a measure of how 
+appropriately the data have been clustered: 
+– The closer to +1, the better
+Alberto Ortiz (last update 26/01/2026)
+The elbow method and the silhouette coefficient
+
+24
+• If there are too many or too few clusters, as may occur for a poor choice of 𝑀, some 
+of the clusters will typically display much narrower silhouettes than the rest. 
+• Silhouette plots and averages can thus be used to determine the natural number of 
+clusters within a dataset. 
+Alberto Ortiz (last update 26/01/2026)
+The elbow method and the silhouette coefficient
+
+25
+• Example: Silhouette index, k-means and Iris dataset
+Alberto Ortiz (last update 26/01/2026)
+The elbow method and the silhouette coefficient
+
+26
+• Example: Silhouette index, k-means and Iris dataset
+Alberto Ortiz (last update 26/01/2026)
+from sklearn import datasets
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score 
+from yellowbrick.cluster import SilhouetteVisualizer
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+fig, ax = plt.subplots(2, 2, figsize=(15,8))
+for i in [2, 3, 4, 5]:
+    km = KMeans(n_clusters=i, init='k-means++', n_init=10, max_iter=100)
+    q, mod = divmod(i, 2)
+    visualizer = SilhouetteVisualizer(km, colors='yellowbrick', ax=ax[q-1][mod])
+    visualizer.fit(X)
+km = KMeans(n_clusters=3, random_state=42)
+score = silhouette_score(X, km.labels_, metric='euclidean')
+km.fit_predict(X)
+print('Silhouette coefficient: %.3f' % score)
+>>> Silhouette coefficient: 0.553
+The elbow method and the silhouette coefficient
+
+Alberto Ortiz (last update 26/01/2026) 27
+Contents
+• Introduction
+• Supplementary: Is there structure in the data?
+• The elbow method and the silhouette coefficient
+• Dunn and Davies-Bouldin indices
+• Homogeneity, completeness and V-measure
+
+Alberto Ortiz / EPS (last update 26/01/2026) 28
+• Cluster the dataset for different values of the number of clusters 𝑀 and select the 𝑀∗
+that optimizes a certain expression involving the resulting clusters
+– Davies-Bouldin index:
+• 𝑆𝑖
+2 = intra-cluster variance
+(it is assumed the use of the Euclidean 
+distance for measuring dissimilarity)
+• Compact and well-separated clusters 
+ 𝐷𝐵 
+• Take the 𝑀∗ that minimizes 𝐷𝐵(𝑀)
+Dunn and Davies-Bouldin indices
+
+Alberto Ortiz / EPS (last update 26/01/2026) 29
+Dunn and Davies-Bouldin indices
+• Cluster the dataset for different values of the number of clusters 𝑀 and select the 𝑀∗
+that optimizes a certain expression involving the resulting clusters
+– Dunn index:
+• compact and separated clusters  𝐷𝐼  
+• expressed for a generic dissimilarity 𝑑
+• Choose 𝑀∗ that maximizes DI(M)
+diam(C1)
+d(C1,C2) diam(C2)
+
+
+Alberto Ortiz / EPS (last update 26/01/2026) 30
+• Example 1
+Dunn and Davies-Bouldin indices
+
+Alberto Ortiz / EPS (last update 26/01/2026) 31
+• Example 2
+Dunn and Davies-Bouldin indices
+
+32
+Dunn and Davies-Bouldin indices
+• Example 3: Davis-Bouldin index, k-means and Iris dataset
+Alberto Ortiz (last update 26/01/2026)
+from sklearn import datasets
+from sklearn.cluster import KMeans
+from sklearn.metrics import davies_bouldin_score
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import scale
+iris = datasets.load_iris()
+X = scale(iris.data)
+y = iris.target
+db = []
+M = [2, 3, 4, 5, 6, 7, 8]
+for j in M:
+km = KMeans(n_clusters=j, init='k-means++',
+n_init=10, max_iter=100)
+labels = km.fit_predict(X)
+db.append(davies_bouldin_score(X, labels))
+plt.figure(figsize=(8,8))
+plt.plot(M, db, 'bx-')
+plt.show()
+
+
+Alberto Ortiz (last update 26/01/2026) 33
+Contents
+• Introduction
+• Supplementary: Is there structure in the data?
+• The elbow method and the silhouette coefficient
+• Dunn and Davies-Bouldin indices
+• Homogeneity, completeness and V-measure
+
+Alberto Ortiz / EPS (last update 26/01/2026) 34
+• The V-measure is the weighted harmonic mean of the homogeneity ℎ and the 
+completeness 𝑐 of a clustering:
+– The V-measures has been proved to be equivalent to another metric, the so-called 
+Normalized Mutual Information (NMI)
+– Homogeneity and completeness are defined 
+on the basis of a clustering 𝐶 and 
+the true classes 𝐺, from the so-called
+contingency table →
+• the homogeneity ℎ is maximized when each cluster contains elements of as few 
+different classes as possible, ideally one single class → ℎ = 1
+• the completeness 𝑐 is maximized when elements of each class lie in as few 
+different clusters as possible, ideally one single cluster → 𝑐 = 1
+• V-measure for the ideal case is 𝑣 = 1
+Homogeneity, completeness and V-measure
+
+
+Alberto Ortiz / EPS (last update 26/01/2026) 35
+Homogeneity, completeness and V-measure
+homogeneity
+entropy and conditional entropy
+
+
+Alberto Ortiz / EPS (last update 26/01/2026) 36
+Homogeneity, completeness and V-measure
+completeness
+entropy and conditional entropy
+
+
+Alberto Ortiz / EPS (last update 26/01/2026) 37
+Homogeneity, completeness and V-measure
+• Example: 4 classes, 250 samples/class
+results:
+[[  0 250   0   0]
+[  0   0 250   0]
+[250   0   0   0]
+[  0   0   0 250]]
+h =  1.0, 
+c =  1.0, 
+v =  1.0
+km = KMeans(n_clusters=4, init='k-means++', n_init=10, max_iter=100)
+km.fit_predict(X)
+cm = contingency_matrix(y, km.labels_)
+print(cm)
+s = homogeneity_completeness_v_measure(y, km.labels_, beta=1.0)
+print('h = ', s[0], ', c = ', s[1], ', v = ', s[2])
+(perform proper imports!)
+
+Alberto Ortiz / EPS (last update 26/01/2026) 38
+Homogeneity, completeness and V-measure
+• Example: 4 classes, 250 samples/class
+results:
+[[238   7   0   5]
+[  2 247   1   0]
+[  0   2 239   9]
+[  4   0   7 239]]
+h =  0.8721128057576535,
+c =  0.8722260670609913,
+v =  0.8721694327322493
+km = KMeans(n_clusters=4, init='k-means++', n_init=10, max_iter=100)
+km.fit_predict(X)
+cm = contingency_matrix(y, km.labels_)
+print(cm)
+s = homogeneity_completeness_v_measure(y, km.labels_, beta=1.0)
+print('h = ', s[0], ', c = ', s[1], ', v = ', s[2])
+(perform proper imports!)
+
+Alberto Ortiz / EPS (last update 26/01/2026) 39
+Homogeneity, completeness and V-measure
+• Example: 4 classes, 250 samples/class
+results:
+[[226   0  24]
+[  1   0 249]
+[  0 248   2]
+[202  48   0]]
+h =  0.6195907856538674,
+c =  0.7964668735209744,
+v =  0.6969822629958449
+km = KMeans(n_clusters=3, init='k-means++', n_init=10, max_iter=100)
+km.fit_predict(X)
+cm = contingency_matrix(y, km.labels_)
+print(cm)
+s = homogeneity_completeness_v_measure(y, km.labels_, beta=1.0)
+print('h = ', s[0], ', c = ', s[1], ', v = ', s[2])
+(perform proper imports!)
+
+40
+Homogeneity, completeness and V-measure
+• Example (Iris dataset):
+Alberto Ortiz (last update 26/01/2026)
+results (M = 3)
+[[ 0 50  0]
+[ 2  0 48]
+[36  0 14]]
+h =  0.7515, 
+c =  0.7650, 
+v =  0.7582
+results (M = 2)
+[[50  0]
+[ 3 47]
+[ 0 50]]
+h =  0.5223, 
+c =  0.8835, 
+v =  0.6565
+results (M = 4)
+[[ 0 50  0  0]
+[23  0  0 27]
+[17  0 32  1]]
+h =  0.8083, 
+c =  0.6522, 
+v =  0.7219
+
+Unsupervised Learning:
+Clustering validity
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes

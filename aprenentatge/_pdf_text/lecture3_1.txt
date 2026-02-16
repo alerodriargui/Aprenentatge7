@@ -1,0 +1,781 @@
+Lecture 3.1
+Supervised learning:
+Bayesian and linear classifiers
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
+
+
+Contents
+• Introduction
+• Bayesian classification
+• Estimation of probability density functions
+• Linear discriminant functions and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+Introduction
+• Supervised classification
+– It is about classifying a new sample in the correct class, having initially designed a 
+classifier from the data available in a training set, in which, in particular, the 
+samples are labeled with the class to which they belong.
+Alberto Ortiz (last update 27/10/2025)
+
+Contents
+• Introduction
+• Bayesian classification
+• Estimation of probability density functions
+• Linear discriminant functions and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+Bayesian classification
+• The goal is to classify a new sample in the most likely class
+– Given a classification task in 𝑀 classes, 𝜔1, 𝜔2, … , 𝜔𝑀, and a new sample 𝑥, 
+we deal with:
+– The classifier decides the most likely class based on the maximum of the 
+probabilities a posteriori: 
+• Bayesian classification rule
+Alberto Ortiz (last update 27/10/2025)
+
+• Review of probability theory:
+– Probability function:
+•  𝑝 assigns a value to each possible event 𝑣 on the basis of how often that event 
+occurs
+•  can be stated as the set of events 
+corresponding to a certain discrete 
+random variable 𝑋 taking certain 
+values, so that 
+𝑝(𝐴𝑖) = 𝑝(𝑋 = 𝑥𝑖)
+• Of particular relevance:
+Bayesian classification
+values taken by the random variable
+probabilities of the 
+corresponding values
+𝑥1 𝑥2 𝑥3 ….    𝑥𝑛
+𝑝2
+𝑝3
+𝑝1
+𝑝𝑛
+𝑋 𝒑𝒊 = 𝒑(𝑿 = 𝒙𝒊)
+𝑥1 𝑝1
+𝑥2 𝑝2
+⋮ ⋮
+𝑥𝑛 𝑝𝑛
+Alberto Ortiz (last update 27/10/2025)
+
+• Review of probability theory:
+– Law of total probability
+•
+– Bayes Rule
+ All this is verified under exactly the same conditions by substituting probabilities 
+by probability density functions (pdf ’s)
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classification: two-class case (𝜔1, 𝜔2)
+– Given the probabilities a priori of both classes 𝑝(𝜔1) and 𝑝(𝜔2)
+• If you do not know 𝑝(𝜔1) and 𝑝(𝜔2), you can estimate them if necessary:
+and the pdf (probability density functions) of each class
+• If they are unknown, they have to be estimated 
+from the available training data 
+(we will deal with this topic later)
+using Bayes' rule, it follows that:
+total probability
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classification: two-class case (𝜔1, 𝜔2)
+– If the probabilities a priori are equal (𝑝(𝜔𝑖) = 1/𝑀 = 0.5), then the classification rule 
+becomes dependent only on the pdfs of the classes:
+– In the one-dimensional case (1 feature), 
+𝑥0 is a threshold that partitions the space 
+into two regions, 𝑅1 and 𝑅2
+– It is obvious that classification 
+errors are unavoidable:
+• Sample 𝑥 can be inside region 𝑅2 and belong to the class ω1 (same for 𝑅1 and ω2)
+𝑝(𝑥|𝜔1) 𝑝(𝑥|𝜔2)
+R1 R2x0
+x
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classification: two-class case (𝜔1, 𝜔2)
+– In the one-dimensional case, the probability of making a classification error is given by: 
+THEOREM
+The Bayesian classifier minimizes the likelihood of classification error
+That is to say, if we move 𝑥0 left or right we will increase 𝑃𝑒
+p(x|1) p(x|2)
+R1 R2x0
+x
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classification: two-class case (𝜔1, 𝜔2)
+Proof (optimality of the Bayesian classifier)
+On the one hand: 
+On the other hand:
+Therefore:
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+Bayesian classification
+𝑥1
+𝑥2
+• Bayesian classification: 
+two-class case (𝜔1, 𝜔2) and 2 features 𝑥1 and 𝑥2
+– Minimize the probability
+of error is equivalent to
+partition the space of
+features into M regions 
+(as many as classes)
+– In general terms, 
+regions 𝑅𝑖 and 𝑅𝑗 are 
+separated by a decision curve 
+that is described by the equation:
+• Corresponds to the points of the
+space in which the probabilities 
+a posteriori coincide
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian Classification
+– Example Let us consider a problem of 2 equiprobable classes (𝑝(𝜔1) = 𝑝(𝜔2) = 0.5) 
+such that the class pdfs are Gaussians of variance 0.5 and means 0 and 1 respectively:
+Calculate the optimal threshold 𝑥0 for minimum error probability.
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classification for normal distributions
+– In the one-dimensional case:
+– We assume that the pdf of the classes obey the Gaussian L-dimensional distribution:
+• For class :
+– This distribution models properly many cases and is treatable mathematically and 
+computationally, hence its popularity
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classification for normal distributions
+– Example
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classifier for normal distributions
+– The goal is to derive the Bayesian classifier for the case
+• Due to the exponential form of the pdf, it is preferable to work with the following 
+discrimination functions 𝑔𝑖(𝑥), which involve the monotonous function ln(∙):
+• Finally:
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classifier for normal distributions
+– Case of 2 uncorrelated characteristics
+• The decision rule is now given by the equation 𝑔𝑖 𝑥  – 𝑔𝑗 𝑥 = 0
+– L = 2: ellipse, parabola, hyperbole, etc. – conic, rule = 2D curve
+– L = 3: ellipsoid, paraboloid, hyperboloid, etc. – quadric, rule = 3D surface
+– L > 3: hiperquadric
+QUADRATIC
+CLASSIFIER
+Bayesian classification
+𝑔𝑖 𝑥 > 𝑔𝑗 𝑥   𝑝 𝜔𝑖 𝑥 > 𝑝 𝜔𝑗 𝑥   𝑥 → 𝜔𝑖
+Alberto Ortiz (last update 27/10/2025)
+𝑔𝑖 𝑥 − 𝑔𝑗 𝑥 = 𝛼𝑖 − 𝛼𝑗 𝑥1
+2 + 𝛽𝑖 − 𝛽𝑗 𝑥2
+2 + 𝛾𝑖 − 𝛾𝑗 𝑥1 + 𝛿𝑖 − 𝛿𝑗 𝑥2 + 𝜖𝑖 − 𝜖𝑗 > 0  𝑥 → 𝜔𝑖
+
+
+• Bayesian classifier for normal distributions
+– Example (equiprobable classes)
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classifier for normal distributions
+– Example (equiprobable classes)
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classifier for normal distributions
+– Classes with the same covariance matrix: decision hyperplanes
+• If the classes have the same covariance matrix (Σ = Σ𝑖) then the quadratic term and 
+part of the constant term coincide in all discrimination functions:
+• Therefore, they disappear from equations 𝑔𝑖 𝑥  – 𝑔𝑗 𝑥 = 0. 
+This allows us to define more useful and simpler discrimination functions:
+• In this way, the discrimination functions are linear (and not quadratic) and the decision 
+rule turns out to be a decision hyperplane: (2D) a straight line, (3D) a plane, ...
+• Let us have a look at two cases of the covariance matrix: (1)  = 𝜎2𝐼 and (2) any 
+LINEAR
+CLASSIFIER
+Bayesian classification
+𝑔𝑖 𝑥 > 𝑔𝑗 𝑥 , ∀𝑗 
+  𝑝 𝜔𝑖 𝑥 > 𝑝 𝜔𝑗 𝑥 , ∀𝑗  𝑥 → 𝜔𝑖
+Alberto Ortiz (last update 27/10/2025)
+𝑔1 𝑥 − 𝑔2 𝑥 = 𝛼1 − 𝛼2 𝑥1 + 𝛽1 − 𝛽2 𝑥2 + 𝛾1 − 𝛾2 > 0  𝑥 → 𝜔1
+= 𝛼𝑖𝑥1 + 𝛽𝑖𝑥2 + 𝛾𝑖 (case of 2 features)
+2D case
+2 classes
+
+• Bayesian classifier for normal distributions
+– Classes with the same covariance matrix: Σ = 𝜎2𝐼
+• Then, the discrimination functions take the following form:
+so that the decision rules can be written as:
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classifier for normal distributions
+– Classes with the same covariance matrix: Σ = 𝜎2𝐼
+• Decision rule
+• Two-feature case
+• Which is this straight line?
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+
+• Bayesian classifier for normal distributions
+– Classes with the same covariance matrix: Σ = 𝜎2𝐼
+• Decision rule for the two-feature case
+• Any point x such that x – x0
+is orthogonal to i - j
+belongs to the straight line
+• x0 is always along
+the vector i - j
+– if p(i) = p(j), x0 is the middle
+point between i and j
+– if p(i) < p(j), x0
+moves towards i
+along vector i - j
+x2
+x1
+i
+j
+i - j
+x0
+x
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classifier for normal distributions
+– Classes with the same covariance matrix: Σ = 𝜎2𝐼
+• the circles expand to 3  98%
+Bayesian classification
+class boundary class boundary
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classifier for normal distributions
+– Classes with the same covariance matrix: any Σ
+• We recover the original linear discrimination functions:
+• Then:
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+
+• Bayesian classifier for normal distributions
+– Classes with the same covariance matrix: any Σ
+• The decision hyperplane is no longer necessarily 
+orthogonal to i - j but to -1(i - j)
+– -1(i - j) is the result of transforming (i - j) through the 
+matrix -1
+• x0 is always on the vector i - j
+– if p(i) = p(j), x0 is the average of i y j
+– if p(i) < p(j), x0 moves towards i along i - j
+x2
+x1
+i
+j
+i - j
+x0
+x
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classifier for normal distributions
+– Example In a two-dimensional classification problem with two equiprobable classes, the 
+classes follow two normal distributions with the following parameters:
+Classify the sample 𝑥 = (1.0,2.2)𝑇 using a Bayesian classifier.
+Therefore, 𝑥 → 𝜔1. 
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+
+> 0 > 0 > 0
+• Bayesian classifier for normal distributions
+– So far we have considered two-class cases and derived the boundaries between 
+class pairs through the discrimination functions: 
+– For two classes
+– If there are more than 2 classes, we have to determine 𝑔𝑖 | 𝑔𝑖 > 𝑔𝑗 , 𝑗 ≠ 𝑖. 
+In case of using the joint discrimination functions 𝑔𝑖𝑗 to decide, we have to 
+consider several 𝑔𝑖𝑗. For example, for 3 classes:
+• to determine Ri we need several 𝑔𝑖𝑘 , 𝑔𝑘𝑖
+M classes: M-1 pairs
+ R1 (1): g12 > 0
+              g13 > 0
+R3 (3):
+g13 < 0
+g23 < 0
+R2 (2):
+g12 < 0
+g23 > 0
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classifier for normal distributions
+– Minimum distance classifiers
+• We can see the above from another point of view
+• We assume equiprobable classes with the same covariance matrix. Then:
+• We assign x to the class for which the probability is greater  gi(x) > gj(x) j  i
+– (1) If  = 2I, gi(x) is higher the closer it is x to i
+ assign x to the class whose center i is closer (Euclidean distance)
+– (2) For generic , we have to assign x to the class for which the following expression takes a 
+lowest value:
+▪ dm  Mahalanobis distance (considers the scattering present in the features)
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+• Bayesian classifier for normal distributions
+– Example In a two-dimensional classification problem into two equiprobable 
+classes the classes have two normal distributions with the following parameters:
+Classify the vector x = (1.0,2.2)T using a Bayesian classifier.
+• dm(x,1) < dm(x,2)  x → 1 . 
+• REMARK: the Euclidean distances would be de(x,1) = 2.417 and de(x,2) = 2.154, so, 
+if we used them, we would assign x → 2 .
+Bayesian classification
+Alberto Ortiz (last update 27/10/2025)
+
+Contents
+• Introduction
+• Bayesian classification
+• Estimation of probability density functions
+• Linear discriminant functions and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions (pdfs)
+– The Bayesian classifier assumes that we have knowledge on the pdfs of the 
+classes of the problem
+– There are different methods to get this type of information:
+• The expression of the pdf is known but the parameters are unknown
+→ parametric estimation
+– Maximum likelihood estimators
+– others
+• The expression of the pdf is not known → non-parametric estimation
+– Parzen windows method
+– k-nearest neighbours method (KNN)
+– others
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Maximum likelihood estimators
+• Let us consider an M-class classification problem whose samples are distributed in 
+accordance to 𝒑 𝒙 𝝎𝒊; 𝜽𝒊 , 𝒊 = 𝟏, … , 𝑴, where 𝜽𝒊 is the vector of parameters for 
+class 𝝎𝒊
+– It's about estimating 𝜽𝒊 by means of a set of samples 𝑥1, 𝑥2, … , 𝑥𝑘 from class 𝝎𝒊
+• We assume that the samples of one class do not affect the estimation of parameters 
+for the other classes in order to formulate the problem irrespective of the class
+ the estimation is repeated for each class
+• In this way, given the statistically independent samples 𝑥1, 𝑥2, … , 𝑥𝑁 from 𝒑 𝒙𝒌 𝜽 , 
+we calculate the following joint pdf:
+• Then, the maximum likelihood estimator of 𝜃 is given by:
+– This represents that 𝜃 that better explains samples 𝑥1, 𝑥2, … , 𝑥𝑁
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Maximum likelihood estimators
+• To simplify the calculations we will go once again to the function ln() to define the log-
+likelihood function:
+• Now, you can find the derivative of the log-likelihood and equal to 0:
+• For sufficiently high N values, the maximum likelihood estimator is asymptotically 
+unbiased, follows a normal distribution and exhibits minimal variance
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Maximum likelihood estimators
+• L-dimensional Gaussian distribution with  known
+• L-dimensional Gaussian distribution,  and  unknown
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+for different 
+sizes of 𝑅𝑗
+• Estimation of probability density functions
+– Non-parametric estimation: first approximation
+• It is about estimating a certain pdf p(x) without setting any expression for the pdf
+• Let us assume we have N independent samples 𝑥1, 𝑥2, … , 𝑥𝑁 that come from the pdf 
+that we want to estimate 
+• To this end, we build a histogram using bins 𝑅𝑗 of the same size:
+– 𝑘𝑁,𝑅𝑗 = how many of the N samples belong to bin 𝑅𝑗
+– {𝑘𝑁,𝑅𝑗/𝑁} is an aproximation of 𝑃𝑅𝑗 = probability that 𝑥 belongs to 𝑅𝑗:
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Non-parametric estimation: first approximation
+• We now define sufficiently small regions 𝑅 around 𝑥, aiming at calculating 𝑝(𝑥). 
+In this regard, if 𝑝(𝑥) is assumed constant inside 𝑅:
+– 𝑉 is the (hyper)volume occupied by region 𝑅 (1D – length, 2D – area, 3D – volume, etc.)
+– e.g. if 𝑅 is a (hyper)cube of dimension 𝐿 and side length ℎ, 𝑉 = ℎ𝐿
+• Therefore:
+•  𝑝𝑁,𝑅(𝑥) → 𝑝(𝑥) as 𝑁 →  if the following holds:
+– 𝑉 → 0 (small regions)
+– 𝑘𝑁,𝑅 → ∞ (sufficient number of samples in each 𝑅)
+– 𝑘𝑁,𝑅/𝑁 → 0 (high total number of samples)
+• In short: for each 𝑥, 𝑝(𝑥) is approximated by defining 
+a small 𝑅 region around 𝑥 and counting how many 𝑥𝑖
+fall into 𝑅 (= 𝑘𝑁,𝑅); if 𝑘𝑁,𝑅 ↑↑ and 𝑁 ↑↑↑, then 𝑝𝑁,𝑅(𝑥) ≈ 𝑝(𝑥)
+𝑥
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimación de funciones de densidad de probabilidad
+– Non-parametric estimation: Parzen windows (Parzen, 1962)
+• Let us consider a region 𝑅 shaped like a (hyper) 𝐿-dimensional cube of side ℎ𝑁. 
+Then:
+• Let us consider the following function (box function or kernel):
+• So, for a certain 𝒙:
+• Then, the number of samples that are inside the 𝑥-centered (hyper)cube is:
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Non-parametric estimation: Parzen windows
+• At last:
+• Therefore, given a certain 𝑥, to obtain the estimate of 𝑝(𝑥): (1D case)
+def parzen_box_1D(x,X,h):
+# x = point where to evaluate the PDF
+# X = table of samples
+# h = side of the (hyper)cube
+N = X.shape[0]; kn = 0
+for i in range(N):
+if abs((x - X[i])/h) <= 0.5: 
+kn = kn+1
+p = (kn/N)/h
+return p
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Non-parametric estimation: Parzen windows
+• Comments on 𝑝𝑁:
+– 𝑝𝑁 is a legitimate pdf
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Non-parametric estimation: Parzen windows
+• Comments on 𝑝𝑁:
+– function 𝑝𝑁(𝑥) can be seen as the average of N functions centred in the samples 𝑥𝑖
+– if ℎ𝑁 is large, the amplitude of 𝛿𝑁
+is small and 𝑝𝑁 is the superposition 
+of 𝑁 wide pulses
+– if ℎ𝑁 is small, the amplitude of 𝛿𝑁
+is large and 𝑝𝑁 is the superposition 
+of 𝑁 narrow pulses
+– ℎ𝑁 → 0  𝛿𝑁 → 𝛿
+N
+1 N
+2 N
+3 N
+4
+x1 x2 x3 x4 x5
+N
+5
+x1 x2 x3 x4 x5
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Non-parametric estimation: Parzen windows
+• Example: 𝑁 random values extracted from a distribution 𝑁(0,1) – rectangular kernel
+softer
+noisier
+better estimation →
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Non-parametric estimation: Parzen windows
+• As we have already seen in the previous example, when approximating continuous 
+functions [𝑝()] by discontinuous kernel functions [()], the resulting estimate also 
+presents discontinuities
+• To avoid this, it is suggested to use continuous kernels ()
+– It can be shown that the resulting estimate 𝑝𝑁(𝑥) is a legitimate pdf if:
+– One of the most commonly used kernels 
+is the Gaussian kernel (mean 0, variance 1): 
+Estimation of probability density functions
+def parzen_gauss_1D(x,X,h):
+# x = point where to evaluate the PDF
+# X = data samples
+# h = side of the (hyper)cube
+N = X.shape[0]; kn = 0
+for i in range(N):
+kn += 1/(sqrt(2*pi))*exp(-0.5*((x-X[i])/h)**2)
+p = (kn/N)/h
+return p
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Non-parametric estimation: Parzen windows
+• Now 𝑝𝑁(𝑥) is obtained as the average of 𝑁 Gaussians centered on the samples 𝑥𝑖
+• Effect of varying bandwidth ℎ𝑁
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Non-parametric estimation: Parzen windows
+• Example: 𝑁 random values extracted from a distribution 𝑁(0,1) – Gaussian kernel
+better estimation →
+Estimation of probability density functions
+softer
+noisier
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Non-parametric estimation: k nearest neighbours
+• Given 𝑥 and a collection of samples 𝑥1, 𝑥2, … , 𝑥𝑁 from a certain pdf p(x), to estimate 
+p(x):
+– Parzen windows method – first, a search volume is set around 𝑥, 𝑉𝑁, and next we 
+determine the number of samples 𝑘𝑁 belonging to that volume
+– Method of the k nearest neighbors – we first find the 𝑘𝑁 samples nearest to 𝑥, and next 
+we determine the minimal volume 𝑉𝑘𝑁 where they are contained in
+We set VN and find kN →
+We set kN and find VN →
+Estimation of probability density functions
+def knn_1D(x,X,k):
+# x = point where to evaluate the PDF
+# X = data samples
+# k = number of neighbours
+N = X.shape[0]; d = []
+for i in range(N):
+d.append(abs(x-X[i]))
+d.sort()
+V = 2 * d[min(N,k)-1]
+p = (k/N)/V
+return p
+Alberto Ortiz (last update 27/10/2025)
+
+• Estimation of probability density functions
+– Non-parametric estimation: k nearest neighbours
+• Example: N random values sampled from a distribution 𝑁(0,1)
+• In this case, it has been used:  
+• In the case of Parzen windows, it is suggested to use: 
+best estimate →
+Estimation of probability density functions
+Alberto Ortiz (last update 27/10/2025)
+
+Contents
+• Introduction
+• Bayesian classification
+• Estimation of probability density functions
+• Linear discriminant functions and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+• We have already seen that, depending on the pdf ’s of the classes (Gaussian case), a 
+Bayesian classifier can derive in a set of linear discrimination functions. For 
+example, for 2 classes:
+– simple and computationally very interesting classifier
+• In this section, we concentrate again on linear discrimination functions, but from a 
+different perspective: we do not assume any pdf for the classes
+– Therefore, regardless of the pdf of the classes, we expect them to be separable by 
+(hyper)planes (1D – point, 2D – straight line, 3D – plane, etc.)
+• In this case it is said that the classes are linearly separable
+– We will see how you can find a (hyper)plane that separates the classes from each other 
+(perceptron algorithm)
+Linear discrimination functions 
+and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+• Linear discrimination functions
+– Goal: find a (hyper)plane that allows us to separate the training samples in 2 classes
+– For example, for 𝐿 = 2 features:
+(hyper)plane: 𝑥 | 𝑔12(𝑥) = 𝑤𝑇(𝑥 − 𝑥0) = 0
+Linear discrimination functions 
+and the perceptron algorithm
+x2
+x1
+-w0/w2
+-w0/w1
+w
+x0
+x
+(normal form)
+(slope-intercept 
+ form)
+Alberto Ortiz (last update 27/10/2025)
+
+• Linear discrimination functions. For now, we will only consider hyperplanes which go 
+through the origin
+– This means that 𝑥0 = (0,0)𝑇 and thus in 𝑤𝑇(𝑥 − 𝑥0)
+– For any point 𝑥𝑖 outside the hyperplane we can state:
+– The sign of 𝑑 depends on the relative position of 𝑥𝑖 with 
+regard to the hyperplane:
+– |𝑑| = |𝑤𝑇𝑥𝑖| indicates how far away the sample is from 
+the (hyper)plane of discrimination
+x2
+x1
+x
+w
+0º
+x2
+x1
+xi
+d
+w
+
+d > 0
+d < 0
+Linear discrimination functions 
+and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+• We assume that the classes 𝜔1 and 𝜔2 are linearly separable, i.e. the hyperplane exists
+• The goal is thus to find a function 𝑔12 𝑥 = 𝑤𝑇𝑥 such that 𝑔12 𝑥 is as follows for each 
+sample 𝑥𝑖 of the training set:
+– 𝑔12 defined in this way is also named as a 
+discrimination function, which in this case turns out to 
+be linear, and thus it is a linear discrimination function
+• To find the hyperplane, we consider the following function (perceptron cost):
+where:
+x2
+x1
+xi
+d
+w
+
+d > 0
+d < 0
+Linear discrimination functions 
+and the perceptron algorithm
+• Change of classroom for 
+exam: classroom 5A
+• Bring your own 
+calculator
+Alberto Ortiz (last update 27/10/2025)
+
+• The perceptron algorithm (Rosenblatt, 1950s) is able to find, through the next 
+iterative approach, the required hyperplane: (sort of gradient descent)
+• The algorithm converges if the classes are linearly separable and if the sequence of 
+learning factor values 𝜌𝑡 meets certain conditions:
+where 𝑡 denotes iteration number.
+− The sequence 𝜌𝑡 determines the convergence speed.
+− For instance, 𝜌𝑡 = 𝑐/𝑡 and 𝜌𝑡 = 𝜌 (𝜌 bounded) meet those conditions.
+Linear discrimination functions 
+and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+• Details on the use of the (basic) perceptron algorithm:
+(1a) To deal with hyperplanes that do not contain the origin, the feature vectors must be 
+augmented in one additional dimension 𝑥𝑖
+∗ = (𝑥𝑖, 1)𝑇. In this way:
+❖ We will use 𝑤𝑇 instead of (𝑤∗)𝑇 and 𝑥 instead of 𝑥∗ to simplify the notation
+(1b) The rule for modifying 𝑤 within every iteration can be generically implemented as 
+follows:
+Linear discrimination functions 
+and the perceptron algorithm
+1 iteration
+Alberto Ortiz (last update 27/10/2025)
+
+• Details of the (basic) perceptron algorithm:
+(1) Example 1
+– The dashed line corresponds to:
+where 𝑤(𝑡) =  (1,1, −0.5)𝑇 is the result of
+the previous step of the perceptron 
+algorithm using 𝜌𝑡 = 𝜌 = 0.7
+– The incorrectly classified samples are:
+(0.40,0.05)𝑇 and (−0.20,0.75)𝑇
+– The new iteration yields
+Linear discrimination functions 
+and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+
+• Details of the (basic) perceptron algorithm:
+(1) Example 1
+– The dashed line corresponds to:
+where 𝑤(𝑡) =  (1,1, −0.5)𝑇 is the result of
+the previous step of the perceptron 
+algorithm using 𝜌𝑡 = 𝜌 = 0.7
+– The incorrectly classified samples are:
+(0.40,0.05)𝑇 and (−0.20,0.75)𝑇
+– The new iteration yields
+– The resulting hyperplane classifies correctly all the samples and the algorithm 
+ends with:
+Linear discrimination functions 
+and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+
+• Details of the (basic) perceptron algorithm:
+(1) Example 2
+Linear discrimination functions 
+and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+• Details of the (basic) perceptron algorithm:
+(1) Implementation
+Linear discrimination functions 
+and the perceptron algorithm
+def perceptron_2D(X, y, rho, nit):
+N = X.shape[0]
+w = np.zeros(3)
+for t in range(nit):
+S = np.zeros(3); ic = 0
+for i in range(N):
+xs = [X[i,0], X[i,1], 1]
+if np.dot(w,xs) < 0 and y[i] == 1: # 1  w1
+S = S + xs; ic += 1
+elif np.dot(w,xs) >= 0 and y[i] == 0: # 0  w2
+S = S - xs; ic += 1
+if ic == 0: # Y = empty set
+break
+else:
+w = w + rho * S
+w = w / sqrt(w[0] ** 2 + w[1] ** 2)
+return w
+Alberto Ortiz (last update 27/10/2025)
+
+• Details of the (basic) perceptron algorithm:
+(2) The pocket algorithm: dealing with non-linearly separable datasets
+– Stops after a number of iterations (𝑇), providing the best hyperplane which has 
+been found along that number of iterations
+– Partially solves the convergence problem of the original perceptron algorithm 
+when the classes are not linearly separable
+Linear discrimination functions 
+and the perceptron algorithm
+Alberto Ortiz (last update 27/10/2025)
+
+• Classification device:
+– Once the perceptron algorithm has converged with e.g. 𝑤 = (𝑤1, 𝑤2, … , 𝑤𝐿, 𝑤0), then 
+the following structure can be considered to implement the classification operation:
+– The perceptron can be considered as the basic building element for more complex learning 
+machines, e.g. neural networks
+
+input 
+nodes
+synaptic
+weights
+threshold
+wL
+w2
+w0
+w1
+x1
+x2
+xL
+activation
+function
+f
+perceptron or
+[artificial] neuron
+(McCulloch-Pitts, 1943)
+Linear discrimination functions 
+and the perceptron algorithm
+𝑥 = (𝑥1, 𝑥2, … , 𝑥𝐿)
+Alberto Ortiz (last update 27/10/2025)
+
+Lecture 3.1
+Supervised learning:
+Bayesian and linear classifiers
+Alberto ORTIZ RODRÍGUEZ
+11752 Aprendizaje Automático
+11752 Machine Learning
+Máster Universitario
+en Sistemas Inteligentes
