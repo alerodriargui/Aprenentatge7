@@ -188,6 +188,44 @@ Se recomienda estandarizar antes de kNN.
 
 ---
 
+## Tema 4.4 — Normalización y outliers
+
+### Ejercicio 1 (min-max)
+Para una variable con \(\min=10\), \(\max=40\), normaliza \(x=25\).
+
+**Resolución**
+\[
+x' = \frac{x-\min}{\max-\min} = \frac{25-10}{40-10} = \frac{15}{30} = 0.5
+\]
+
+**Resultado:** \(x'=0.5\).
+
+### Ejercicio 2 (z-score)
+Media \(\mu=70\), desviación \(\sigma=5\). Calcula el z-score de \(x=80\).
+
+**Resolución**
+\[
+z = \frac{x-\mu}{\sigma} = \frac{80-70}{5} = 2
+\]
+
+**Resultado:** \(z=2\).
+
+### Ejercicio 3 (outlier con IQR)
+Para una variable con \(Q_1=10\), \(Q_3=22\), determina si \(x=41\) es outlier.
+
+**Resolución**
+\[
+IQR = Q_3 - Q_1 = 12
+\]
+\[
+	ext{Límite superior} = Q_3 + 1.5\cdot IQR = 22 + 18 = 40
+\]
+Como \(41>40\), es outlier.
+
+**Resultado:** \(x=41\) es outlier.
+
+---
+
 ## Tema 5.2 — Clustering jerárquico
 
 ### Ejercicio 1 (average-link)

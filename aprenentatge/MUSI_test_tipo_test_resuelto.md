@@ -178,9 +178,29 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
 ---
 
-## 6) Clustering jerárquico
+## 6) Normalizacion y outliers
 
-20. Single-link entre dos clusters usa:
+20. La normalizacion min-max transforma una variable \(x\) a:
+   - A) \((x-\mu)/\sigma\)
+   - B) \(x/\max(x)\)
+   - C) \((x-\min)/(\max-\min)\)
+   - D) \(\log(x)\)
+
+   **Respuesta:** C
+
+21. Un outlier en regresion suele:
+   - A) reducir el error de test
+   - B) afectar fuertemente a la pendiente OLS
+   - C) no influir en el ajuste
+   - D) mejorar siempre \(R^2\)
+
+   **Respuesta:** B
+
+---
+
+## 7) Clustering jerárquico
+
+22. Single-link entre dos clusters usa:
    - A) distancia máxima entre pares
    - B) distancia media
    - C) distancia mínima entre pares
@@ -188,7 +208,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** C
 
-21. Complete-link usa:
+23. Complete-link usa:
    - A) distancia mínima
    - B) distancia máxima
    - C) mediana
@@ -196,7 +216,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** B
 
-22. En Ward se fusiona el par que:
+24. En Ward se fusiona el par que:
    - A) minimiza incremento de varianza intra
    - B) minimiza distancia Manhattan
    - C) maximiza silhouette
@@ -206,9 +226,9 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
 ---
 
-## 7) k-means
+## 8) k-means
 
-23. k-means optimiza principalmente:
+25. k-means optimiza principalmente:
    - A) accuracy
    - B) SSE / inercia intra-cluster
    - C) AUC
@@ -216,7 +236,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** B
 
-24. El centroide de un clúster en k-means es:
+26. El centroide de un clúster en k-means es:
    - A) muestra más cercana al origen
    - B) media de puntos asignados
    - C) mediana global
@@ -224,7 +244,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** B
 
-25. k-means++ se usa para:
+27. k-means++ se usa para:
    - A) elegir k óptimo
    - B) inicializar centroides mejor
    - C) calcular silhouette
@@ -232,7 +252,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** B
 
-26. Una limitación clásica de k-means es:
+28. Una limitación clásica de k-means es:
    - A) no necesita \(k\)
    - B) no sensible a inicialización
    - C) favorece clusters aproximadamente esféricos
@@ -242,9 +262,9 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
 ---
 
-## 8) Evaluación supervisada
+## 9) Evaluación supervisada
 
-27. Precision se define como:
+29. Precision se define como:
    - A) \(TP/(TP+FN)\)
    - B) \(TP/(TP+FP)\)
    - C) \((TP+TN)/N\)
@@ -252,7 +272,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** B
 
-28. Recall (TPR) se define como:
+30. Recall (TPR) se define como:
    - A) \(TP/(TP+FN)\)
    - B) \(TP/(TP+FP)\)
    - C) \(FP/(FP+TN)\)
@@ -260,7 +280,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** A
 
-29. En ROC, el eje X es:
+31. En ROC, el eje X es:
    - A) TPR
    - B) Precision
    - C) FPR
@@ -268,7 +288,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** C
 
-30. AUC cercana a 0.5 indica:
+32. AUC cercana a 0.5 indica:
    - A) clasificador casi aleatorio
    - B) clasificador perfecto
    - C) overfitting seguro
@@ -276,7 +296,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** A
 
-31. F1-score es la media:
+33. F1-score es la media:
    - A) aritmética de P y R
    - B) geométrica de P y R
    - C) armónica de P y R
@@ -284,7 +304,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** C
 
-32. En datos desbalanceados, accuracy alta puede ser:
+34. En datos desbalanceados, accuracy alta puede ser:
    - A) siempre confiable
    - B) engañosa
    - C) igual a F1
@@ -294,9 +314,9 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
 ---
 
-## 9) Validez de clustering y tuning
+## 10) Validez de clustering y tuning
 
-33. En silhouette, valor cercano a 1 sugiere:
+35. En silhouette, valor cercano a 1 sugiere:
    - A) mala separación
    - B) buena cohesión y separación
    - C) ruido puro
@@ -304,7 +324,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** B
 
-34. En el método del codo, se elige \(k\) donde:
+36. En el método del codo, se elige \(k\) donde:
    - A) WCSS sube
    - B) WCSS se hace cero
    - C) la mejora adicional empieza a ser pequeña
@@ -312,7 +332,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** C
 
-35. Para evitar data leakage en tuning con CV:
+37. Para evitar data leakage en tuning con CV:
    - A) escalar antes de dividir
    - B) pipeline dentro de CV
    - C) usar test set para elegir hiperparámetros
@@ -320,7 +340,7 @@ Formato: 4 opciones (A/B/C/D), respuesta correcta y explicación breve.
 
    **Respuesta:** B
 
-36. GridSearchCV elige hiperparámetros según:
+38. GridSearchCV elige hiperparámetros según:
    - A) score medio de validación
    - B) score de entrenamiento
    - C) menor tiempo de cómputo
